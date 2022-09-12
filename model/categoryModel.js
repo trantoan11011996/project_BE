@@ -4,11 +4,12 @@ const categorySchema = mongoose.Schema(
     {
         name : {
             type : String,
-            require : true
+            required : true
         }
-    }
+    },
+    {collection : "category"}
 )
 
 
-const Category = mongoose.model('Category',categorySchema)
-module.exports = Category
+const categoryModel = mongoose.model('Category',categorySchema)
+module.exports = categoryModel

@@ -1,20 +1,24 @@
-const Products = require('../model/productModel')
-const Variants = require('../model/productVariantModel')
-const Category = require ('../model/categoryModel')
+const productModel = require('../model/productModel')
+const variantModel = require('../model/productVariantModel')
+const categoryModel = require ('../model/categoryModel')
 
 
 const createProduct = async(req,res) =>{
-    const products = await Products.create(req.body)
-    await products.save()
+    const product = await productModel.create(req.body)
+    await product.save()
     res.json(
         {
-            products
+            product
         }
     )
 }
-
+const getAll = async(req,res)=>{
+    const allProduct = await productModel.find().populate('category',"-_id",).populate('option')
+    res.json(allProduct)
+}
 
 
 module.exports = {
-    createProduct
+    createProduct,
+    getAll
 }

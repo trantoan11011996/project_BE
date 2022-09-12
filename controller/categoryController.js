@@ -1,10 +1,10 @@
-const Products = require('../model/productModel')
-const Variants = require('../model/productVariantModel')
-const Category = require ('../model/categoryModel')
+const productModel = require('../model/productModel')
+const variantModel = require('../model/productVariantModel')
+const categoryModel = require ('../model/categoryModel')
 
 
 const createCategory = async(req,res) =>{
-    const category = await Category.create(req.body)
+    const category = await categoryModel.create(req.body)
     await category.save()
     res.json(
         {
