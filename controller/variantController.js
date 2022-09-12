@@ -1,6 +1,6 @@
-const Products = require('../model/productModel')
-const Variants = require('../model/productVariantModel')
-const Category = require ('../model/categoryModel')
+const productModel = require('../model/productModel')
+const variantModel = require('../model/productVariantModel')
+const categoryModel = require ('../model/categoryModel')
 const asyncHandler = require('express-async-handler')
 
 
@@ -8,20 +8,20 @@ const createVariants =asyncHandler(async(req,res) =>{
     const id_product = req.body.productId
 
     try{
-        const product = await Products.findById(id_product).populate('category').populate('product')
+        const product = await productModel.findById(id_product).populate('category')
+        console.log('product',product);
         if(product){
-            const variant = await Variants.create(req.body)
+            const variant = await variantModel.create(req.body)
             await variant.save()
-            product.product.push(variant)
+            product.option.push(variant)
             await product.save()
             res.json({
-                variant,
                 product
             })
         }
         else{
-            res.status(400)
-            throw new Error('lỗi đâu đó')
+            res.status(404)
+            throw new Error('loi')
         }
     }catch(err){
         throw new Error(err)
@@ -34,3 +34,4 @@ const createVariants =asyncHandler(async(req,res) =>{
 module.exports = {
     createVariants
 }
+

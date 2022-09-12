@@ -20,9 +20,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/keymaster/users', userRouter);
-app.use('/keymaster/products', productRouter);
-app.use('/keymaster/products/category', categoryRouter);
+app.use('/api/users', userRouter);
+app.use('/api/products', productRouter);
+app.use('/api/products/category', categoryRouter);
 
 
 // catch 404 and forward to error handler
