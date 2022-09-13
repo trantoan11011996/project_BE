@@ -10,6 +10,10 @@ const adminSchema = mongoose.Schema({
         min: 6,
         required : true
     },
+    idAdmin :{
+        type : Boolean,
+        default : true,
+    }
 },
 {collection : "admin"})
 

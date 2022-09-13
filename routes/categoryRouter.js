@@ -1,15 +1,15 @@
 var express = require('express');
-const { createCategory } = require('../controller/categoryController');
+const { createCategory,getAllCategory } = require('../controller/categoryController');
 var router = express.Router();
 
 
-// get all product
-router.get('/')
-// create product
-
+// get all category
+router.get('/',getAllCategory)
+// create category
 router.post('/',createCategory)
 
 
 module.exports = router;
 
 
+///api/user/admin/p

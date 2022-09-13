@@ -49,21 +49,31 @@ const loginUser = asyncHandler(async(req,res)=>{
 })
 
 
+const getProfileUser = asyncHandler(async(req,res)=>{
+    const user = await userModel.findById(req.userInfo._id)
+    if(user){
+        res.status(200)
+        res.json(user)
+    }
+    else{
+        res.status(400)
+        throw new Error('user can not found')
+    }
+})
 //update user 
 
 const updateUser = asyncHandler(async(req,res)=>{
     const user = await userModel.findById(req.userInfo._id)
 
     if (user) {
-        user.email = req.body.email || user.email
+        user.address = req.body.address || user.address
         if (req.body.password) {
             user.password = req.body.password
         }
         const update = await user.save()
         res.json({
-            email: update.email,
             _id: update._id,
-            password : update.password
+            password : update.password,
         })
     }
     else {
@@ -74,20 +84,6 @@ const updateUser = asyncHandler(async(req,res)=>{
     }
 })
 
-// get profile user
-const getProfileUser = asyncHandler(async(req,res)=>{
-    const user = await userModel.findById(req.userInfo._id)
-    if(user){
-        res.status(200)
-        res.json(user)
-    }
-    else{
-        res.status(400)
-        res.json({
-            message : "user can not found"
-        })
-    }
-})
 
 // get user by id
 const getUser = asyncHandler(async(req,res)=>{
