@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
+const {Schema} = mongoose
 
 const validateEmail = function(email){
     var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -24,6 +25,7 @@ const userSchema = mongoose.Schema({
         min: 6,
         required : true
     },
+    order : [{type : Schema.Types.ObjectId , ref : 'Order'}]
 },
 {collection : "users"})
 
