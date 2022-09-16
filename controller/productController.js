@@ -3,27 +3,44 @@ const variantModel = require("../model/productVariantModel");
 const categoryModel = require("../model/categoryModel");
 const asyncHandler = require("express-async-handler");
 
-const createProduct = async (req, res) => {
-  const product = await productModel.create(req.body);
-  await product.save();
-  res.json({
-    product,
-  });
-};
 
-const getProduct = asyncHandler(async (req, res) => {
-  const product = "";
-});
-const getAllProduct = async (req, res) => {
-  const allProduct = await productModel
-    .find()
-    .populate("category", "-_id")
-    .populate("option");
-  res.json(allProduct);
-};
+
+const getProductDetail = asyncHandler(async(req,res)=>{
+    const product = await productModel.findById(req.params.id).populate("variants").populate("colors")
+    if(product){
+        res.status(200)
+        res.json(product)
+    }
+    else{
+        res.status(400)
+        throw new Error('alo')
+    }
+})
+
+const getProductByCategory = asyncHandler(async(req,res)=>{
+    const product = await productModel.find().populate('category')
+    if(product){
+        console.log(product)
+        res.status(200)
+        res.json([
+            product
+        ])
+    }else{
+        res.status(400)
+        res.json({
+            message : 'product can not found'
+        })
+    }
+})
+
+const getAllProduct = async(req,res)=>{
+    const allProduct = await productModel.find().populate('category')
+    const allCategory = await categoryModel.find()
+    res.json({allProduct,allCategory})
+}
 
 const getProductById = asyncHandler(async (req, res) => {});
-const getProductByCategory = asyncHandler(async (req, res) => {});
+const getProductByCategorys = asyncHandler(async (req, res) => {});
 
 module.exports = {
   createProduct,

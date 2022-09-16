@@ -10,17 +10,43 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    image: [
+    imageMain : {type : String, require : true},
+    imageDetails: [
       {
         type: String,
         required: true,
       },
     ],
+    price : {
+      type : Number,
+      required : true
+    },
+    video_link: {
+      type: String
+    },
     category: { type: Schema.Types.ObjectId, ref: "Category" },
-    option: [{ type: Schema.Types.ObjectId, ref: "Variant" }],
+    accessories : [{type : Schema.Types.ObjectId, ref : "Product"}],
+    nameLabel : {
+      type : String
+    },
+    variants:  [{ type: Schema.Types.ObjectId, ref: "Variant" }],
+    
+    nameColor : {
+      type : String
+    },
+    colors : [{type : Schema.Types.ObjectId, ref : "Color"}],
+    countInStock : {
+      type : Number,
+    },
+    isTrending : {
+      type : Boolean,
+    },
+    productType : {
+      name : String,
+    },
   },
   { collection: "products" }
 );
 
-const productModel = mongoose.model("Product", productSchema);
-module.exports = productModel;
+const producModel = mongoose.model("Product", productSchema);
+module.exports = producModel;
