@@ -6,7 +6,7 @@ var logger = require('morgan');
 const connectDB = require('./config/db')
 const userRouter = require('./routes/userRouter')
 const productRouter = require('./routes/productRouter')
-const categoryRouter = require('./routes/categoryRouter')
+const adminRouter = require('./routes/adminRouter')
 connectDB()
 var app = express();
 const {errHandle} = require('./middleware/middleware') 
@@ -22,8 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/users', userRouter);
 app.use('/api/products', productRouter);
-app.use('/api/products/category', categoryRouter);
-
+app.use('/api/admin',adminRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
