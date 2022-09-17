@@ -1,4 +1,5 @@
 const userModel = require("../model/userModel");
+const orderModel = require("../model/orderModel");
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../unitls/generateToken");
 const bcrypt = require("bcryptjs");
@@ -116,6 +117,22 @@ const deleteUser = asyncHandler(async (req, res) => {
     res.json({
       message: "lỗi",
     });
+  }
+});
+
+const createOrder = asyncHandler(async (req, res) => {
+  const idUser = req.params.id;
+  const body = { ...req.body };
+
+  const user = await userModel.findById(idUser);
+  if (user) {
+    const order = new orderModel();
+    order.user = idUser;
+    order.shippingAddress = body.shippingAddress;
+        
+  } else {
+    res.status(404);
+    throw new Error("User is not exist");
   }
 });
 
