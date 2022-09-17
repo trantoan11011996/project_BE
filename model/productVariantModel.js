@@ -1,34 +1,21 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const variantSchema = mongoose.Schema(
+const variantSchema = mongoose.Schema([
   {
     productId: { type: Schema.Types.ObjectId, ref: "Product" },
-    titleOption: {
-      type: String,
+    name : {
+      type : String,
     },
-    option: [
-      {
-        name: {
-          type: String,
-        },
-        price: {
-          type: Number,
-          required: true,
-        },
-        priceDiscount: {
-          type: Number,
-        },
-        image: {
-          type: String,
-          required: true,
-        },
-        countInStock: {
-          type: Number,
-          required: true,
-        },
-      },
-    ],
-  },
+    image : {
+      type : String
+    },
+    price : {
+      type : Number
+    },
+    countInStock : {
+      type : Number
+    },
+  }],
   { collection: "variants" }
 );
 
