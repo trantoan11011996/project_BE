@@ -103,6 +103,8 @@ const updateOrder = asyncHandler(async (req, res) => {
   }
 });
 
+const creteaOrder = () => {};
+
 module.exports = {
   createProduct,
   updateProduct,
