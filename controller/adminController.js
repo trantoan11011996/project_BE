@@ -130,7 +130,7 @@ const deleteVariant = asyncHandler(async(req,res)=>{
 
 })
 
-const creteaOrder = () => {};
+const creteaOer = () => {};
 
 module.exports = {
     creatAdmin,
