@@ -1,6 +1,5 @@
 const express = require("express");
 const {
-  creatAdmin,
   createProduct,
   createCategory,
   updateProduct,
@@ -9,14 +8,12 @@ const {
   updateVariant,
   deleteVariant,
   createColors,
-} = require("../controller/adminController");
+} = require("../controller/productController");
 const router = express();
 const { protect, checkAdmin } = require("../middleware/authMiddleware");
 
 
 
-// create admin
-router.post('/',creatAdmin)
 
 //4
 // desc : create new product  => return category
@@ -65,8 +62,6 @@ router.put("/variant/:id", updateVariant);
 // route : DEL /api/admin/variant
 // access : private - admin
 router.delete("/variant/:id", deleteVariant);
-
-
 
 
 // 8.
