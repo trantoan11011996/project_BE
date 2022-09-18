@@ -6,26 +6,21 @@ const bcrypt = require("bcryptjs");
 
 // create User
 
-const creatUser = asyncHandler(async (req, res) => {
+const createUser = asyncHandler(async (req, res) => {
   const { body } = req;
   const userExist = await userModel.findOne({ email: body.email });
   if (userExist) {
-    res.status(400);
+    res.status(404);
     res.json({
       message: "user have been exist",
     });
   }
   const newUser = await userModel.create(req.body);
-  if (newUser) {
-    res.status(200);
-    res.json({
-      newUser,
-      token: generateToken(newUser._id),
-    });
-  } else {
-    res.status(200);
-    throw new Error("ivalid register user");
-  }
+  res.json({
+    email: newUser.email,
+    name: newUser.name,
+    token: generateToken(newUser._id),
+  });
 });
 
 //login user
@@ -34,7 +29,6 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const user = await userModel.findOne({ email });
   if (user && (await bcrypt.compare(password, user.password))) {
-    res.status(200);
     res.json({
       name: user.name,
       email: user.email,
@@ -42,22 +36,18 @@ const loginUser = asyncHandler(async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(400);
-    res.json({
-      message: "password or email incorrect",
-    });
+    res.status(404);
+    throw new Error("email or password incorrect");
   }
 });
 
 const getProfileUser = asyncHandler(async (req, res) => {
   const user = await userModel.findById(req.userInfo._id);
-  if (user) {
-    res.status(200);
-    res.json(user);
-  } else {
-    res.status(400);
-    throw new Error("user can not found");
-  }
+  res.json({
+    email: user.email,
+    name: user.name,
+    order: user.order,
+  });
 });
 //update user
 
@@ -65,17 +55,17 @@ const updateUser = asyncHandler(async (req, res) => {
   const user = await userModel.findById(req.userInfo._id);
 
   if (user) {
-    user.address = req.body.address || user.address;
-    if (req.body.password) {
-      user.password = req.body.password;
-    }
+    user.email = req.body.email || user.mail;
+    user.password = req.body.password || user.password;
+    user.name = req.body.name || user.name;
     const update = await user.save();
     res.json({
-      _id: update._id,
-      password: update.password,
+      email: update.email,
+      name: update.email,
+      message: "update thành công",
     });
   } else {
-    res.status(400);
+    res.status(404);
     res.json({
       message: "user not found",
     });
@@ -84,29 +74,43 @@ const updateUser = asyncHandler(async (req, res) => {
 
 // get user by id
 const getUser = asyncHandler(async (req, res) => {
-  const user = await userModel.findOne(req.params.id).select("-password");
+  const user = await userModel
+    .findById(req.params.id)
+    .select("-password")
+    .populate({
+      path: "order",
+      populate: {
+        path: "items",
+        populate: { path: "variant", select: "discountPrice" },
+      },
+    });
   if (user) {
     res.json(user);
   } else {
-    res.status(400);
+    res.status(404);
     throw new Error("user not found");
   }
 });
 
 //get all user
 const getAllUser = asyncHandler(async (req, res) => {
-  const user = await userModel.find();
+  const pageSize = 16;
+  const page = req.query.pageNumber || 1;
+  const user = await userModel
+    .find()
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
   if (user) {
     res.json(user);
   } else {
-    res.json({
-      message: `lỗi`,
-    });
+    res.status(404);
+    throw new Error("user not found");
   }
 });
 
 // delete
 const deleteUser = asyncHandler(async (req, res) => {
+  ///liên quan đến  order 
   const user = await userModel.findById(req.params.id);
   if (user) {
     await user.remove();
@@ -114,10 +118,8 @@ const deleteUser = asyncHandler(async (req, res) => {
       message: "xóa thành công",
     });
   } else {
-    res.status(200);
-    res.json({
-      message: "lỗi",
-    });
+    res.status(404);
+    throw new Error("user not found");
   }
 });
 
@@ -137,7 +139,7 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  creatUser,
+  createUser,
   loginUser,
   getProfileUser,
   updateUser,

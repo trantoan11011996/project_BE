@@ -1,0 +1,8 @@
+variantDisplay = [
+    {name : PCB , value : [kit1,kit2]}
+    {name : Color , value : [kit2,kit3]}
+]
+
+////// price => dựa vào variant 
+//// nếu variant.length = 0 => price của product = req.body.total price
+/// nếu variant.length >= 1 => price của product = min price của variant

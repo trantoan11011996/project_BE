@@ -7,8 +7,20 @@ const productSchema = mongoose.Schema(
       required: true,
     },
     desc: {
-      type: String,
-      required: true,
+      titleDesc : {
+        type : String,
+      },
+      option : [
+        {
+          titleOption  : {
+            type : String
+          },
+          listOption : []
+        }
+      ],
+      video_link: {
+        type: String
+      },
     },
     imageMain : {type : String, require : true},
     imageDetails: [
@@ -20,12 +32,6 @@ const productSchema = mongoose.Schema(
     price : {
       type : Number,
       required : true
-    },
-    discountPrice : {
-      type : Number
-    },
-    video_link: {
-      type: String
     },
     category: { type: Schema.Types.ObjectId, ref: "Category" },
     accessories : [{type : Schema.Types.ObjectId, ref : "Product"}],

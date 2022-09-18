@@ -4,7 +4,7 @@ const variants =  [
         "productId": "63260c74c426179c8111c908",
         "countInStock": 5,
         "attributes": {
-            "PCB": "Solder",
+            "name": "PCB",
             "Color": "Black"
         },
         "__v": 0

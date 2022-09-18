@@ -16,11 +16,12 @@ router.get('/',getAllProduct)
 // access : public
 
 router.get('/:id', getProductDetail)
+
 // 3.
 // desc : get product by category
 // route : GET /api/products/category/:name
 // access : public
 
-router.get("/category/:name", getProductByCategory);
+router.get("/category/:id", getProductByCategory);
 
 module.exports = router;

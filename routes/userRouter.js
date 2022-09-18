@@ -1,11 +1,8 @@
 var express = require("express");
 const {
-  creatUser,
+  createUser,
   loginUser,
   updateUser,
-  getAllUser,
-  deleteUser,
-  getUser,
   getProfileUser,
 } = require("../controller/userController");
 const { protect, checkAdmin } = require("../middleware/authMiddleware");
@@ -15,7 +12,7 @@ var router = express.Router();
 // desc : register new user
 // route : POST /api/users/register
 // access : public
-router.post("/", creatUser);
+router.post("/", createUser);
 
 // 2.
 // desc : user login to system
