@@ -12,7 +12,6 @@ const {
   createVariants,
   updateVariant,
   deleteVariant,
-  createAttributes,
 } = require("../controller/productController");
 const {
   getAllUser,
@@ -22,17 +21,15 @@ const {
 const { protect, checkAdmin } = require("../middleware/authMiddleware");
 const router = express();
 
-// 1
-// desc : create new product  => return category
-// route : POST /api/admin/product
-// access : private - admin
-router.post("/product", createProduct);
-
-// 2
 // desc : create new category
 // route : POST /api/admin/product
 // access : private - admin
 router.post("/category", createCategory);
+
+// desc : create new product  => return category
+// route : POST /api/admin/product
+// access : private - admin
+router.post("/product", createProduct);
 
 // 3
 // desc : update product
@@ -44,7 +41,7 @@ router.put("/product/:id", updateProduct);
 // desc : delete products
 // route : DEL /api/admin/prouduct/:id
 // access : private - admin
-router.delete("/:id", protect, checkAdmin, deleteProduct);
+router.delete("/product/:id", protect, checkAdmin, deleteProduct);
 
 // 5
 // desc : create variant for product
@@ -68,19 +65,19 @@ router.delete("/variant/:id", deleteVariant);
 // desc : get all user
 // route : GET /api/users/
 // access : private - admin
-router.get("/", protect, checkAdmin, getAllUser);
+router.get("/user", protect,checkAdmin, getAllUser);
 
 // 9
 // desc : get user by id
 // route : GET /api/users/:id/
 // access : private - admin
-router.get("/:id", protect, checkAdmin, getUser);
+router.get("/user/:id", protect, checkAdmin, getUser);
 
 // 10
 // desc : delete user
 // route : DEL /api/users/:id
 // access : private - admin
-router.delete("/:id", protect, checkAdmin, deleteUser);
+router.delete("/user/:id", protect, checkAdmin, deleteUser);
 
 // 11
 // desc : get order

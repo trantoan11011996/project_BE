@@ -16,9 +16,7 @@ const variantSchema = mongoose.Schema(
     countInStock : {
       type : Number
     },
-    attributes : {
-      
-    }
+    attributes : []
   },
   { collection: "variants" }
 );
