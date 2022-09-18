@@ -31,9 +31,8 @@ const updateOrder = asyncHandle(async (req, res) => {
 
 const createOrder = asyncHandle(async (req, res) => {
   const body = { ...req.body };
-  const order = await orderModel.create(body);
 
-  for (let item of order.items) {
+  for (let item of body.items) {
     const variant = await variantModel.findById(item.product);
   }
 });
