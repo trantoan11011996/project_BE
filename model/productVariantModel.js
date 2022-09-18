@@ -1,7 +1,7 @@
-const { urlencoded } = require("express");
+
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const variantSchema = mongoose.Schema([
+const variantSchema = mongoose.Schema(
   {
     productId: { type: Schema.Types.ObjectId, ref: "Product" },
     image : {
@@ -10,13 +10,16 @@ const variantSchema = mongoose.Schema([
     price : {
       type : Number
     },
+    discountPrice : {
+      type : Number
+    },
     countInStock : {
       type : Number
     },
     attributes : {
-
+      
     }
-  }],
+  },
   { collection: "variants" }
 );
 

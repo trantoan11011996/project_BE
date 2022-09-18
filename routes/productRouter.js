@@ -15,7 +15,7 @@ router.get('/',getAllProduct)
 // route GET /api/products/:id
 // access : public
 
-router.get('/product/:id', getProductDetail)
+router.get('/:id', getProductDetail)
 // 3.
 // desc : get product by category
 // route : GET /api/products/category/:name

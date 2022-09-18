@@ -35,22 +35,6 @@ router.get("/profile", protect, getProfileUser);
 // access : user
 router.put("/profile", protect, updateUser);
 
-// 5.
-// desc : get all user
-// route : GET /api/users/
-// access : private - admin
-router.get("/", protect, checkAdmin, getAllUser);
 
-// 6.
-// desc : get user by id
-// route : GET /api/users/:id/
-// access : private - admin
-router.get("/:id", protect, checkAdmin, getUser);
-
-// 7.
-// desc : delete user
-// route : DEL /api/users/:id
-// access : private - admin
-router.delete("/:id", protect, checkAdmin, deleteUser);
 
 module.exports = router;

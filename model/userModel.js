@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs')
 const { Schema } = mongoose;
 
 const validateEmail = function (email) {
@@ -10,7 +10,6 @@ const userSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
     },
     email: {
       type: String,
@@ -30,6 +29,10 @@ const userSchema = mongoose.Schema(
       required: true,
     },
     order: [{ type: Schema.Types.ObjectId, ref: "Order" }],
+    isAdmin : {
+      type : Boolean,
+      default : false
+    }
   },
   { collection: "users" }
 );

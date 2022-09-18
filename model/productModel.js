@@ -21,20 +21,15 @@ const productSchema = mongoose.Schema(
       type : Number,
       required : true
     },
+    discountPrice : {
+      type : Number
+    },
     video_link: {
       type: String
     },
     category: { type: Schema.Types.ObjectId, ref: "Category" },
     accessories : [{type : Schema.Types.ObjectId, ref : "Product"}],
-    nameLabel : {
-      type : String
-    },
     variants:  [{ type: Schema.Types.ObjectId, ref: "Variant" }],
-    
-    nameColor : {
-      type : String
-    },
-    colors : [{type : Schema.Types.ObjectId, ref : "Color"}],
     countInStock : {
       type : Number,
     },
