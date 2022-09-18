@@ -1,145 +1,117 @@
+const productModel = require("../model/productModel");
+const categoryModel = require("../model/categoryModel");
+const variantModel = require("../model/productVariantModel");
+const asyncHandler = require("express-async-handler");
+const orderModel = require("../model/orderModel");
 
-const productModel = require('../model/productModel')
-const variantModel = require('../model/productVariantModel')
-const categoryModel = require ('../model/categoryModel')
-const colorModel = require('../model/colorVariantModel')
-const asyncHandler = require('express-async-handler')
-const generateToken = require('../unitls/generateToken')
+// ---------------------------------------------------------- //
 
+const createProduct = asyncHandler(async (req, res) => {
+  const category = await categoryModel.findById(req.body.category);
 
-const creatAdmin = asyncHandler(async(req,res)=>{
-    const {body} = req
-    const userExist = await adminModel.findOne({email})
-    if(userExist){
-        res.status(400)
-        res.json({
-            message : "user have been exist"
-        })
+  if (category) {
+    const product = await productModel.create(req.body);
+    res.json(product);
+  } else {
+    res.status(404);
+    throw new Error("Category is not exist");
+  }
+});
+
+const updateProduct = asyncHandler(async (req, res) => {
+  const product = await productModel.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+      new: true,
     }
-    const newUser = await adminModel.create(body)
-    if(newUser){
-        res.status(200)
-        res.json({
-            newUser,
-            token : generateToken(newUser._id)
-        })
-    }else{
-        res.status(200)
-        throw new Error('ivalid register user')
-    }
-})
-const createProduct = async(req,res) =>{
-    const product = await productModel.create(req.body)
-    // await product.save()
-    const varianst = product.variants
-    const variantsLength = varianst.length 
-    if(variantsLength == 0){
-       product.countInStock = req.body.countInStock
-       await product.save()
-       res.json(product)
-    }
-}
+  );
+  if (product) {
+    res.json(product);
+  } else {
+    res.status(404);
+    throw new Error("Product is not exist");
+  }
+});
 
-const createCategory = async(req,res) =>{
-    const category = await categoryModel.create(req.body)
-    await category.save()
-    res.json(
-        category
-    )
-} 
+const deleteProduct = asyncHandler(async (req, res) => {
+  const product = await productModel.findByIdAndDelete(req.params.id);
+  if (product) {
+    res.json("Delete success");
+  } else {
+    res.status(404);
+    throw new Error("Delete failed");
+  }
+});
+
+const createVariant = asyncHandler(async (req, res) => {
+  const product = await productModel.findById(req.body.product);
+  if (product) {
+    const variant = await variantModel.create(req.body);
+    res.json(variant);
+  } else {
+    res.status(404);
+    res.json("Product is not exist");
+  }
+});
+
+const updateVariant = asyncHandler(async (req, res) => {
+  const variant = await variantModel.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+  if (variant) {
+    res.json(variant);
+  } else {
+    res.status(404);
+    throw new Error("Variant is not exist");
+  }
+});
+
+const deleteVariant = asyncHandler(async (req, res) => {
+  const variant = await variantModel.findByIdAndDelete(req.params.id);
+  if (variant) {
+    res.json("Delete success");
+  } else {
+    res.status(404);
+    throw new Error("Delete failed");
+  }
+});
+
+const getAllOrder = asyncHandler(async (req, res) => {
+  const pageSize = 10;
+  const page = req.query.pageNumber || 1;
+
+  const order = await orderModel
+    .find()
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+
+  res.json({ page, order });
+});
+
+const updateOrder = asyncHandler(async (req, res) => {
+  const order = await orderModel.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  if (order) {
+    res.json(order);
+  } else {
+    res.status(404);
+    throw new Error("Order is not exist");
+  }
+});
 
 
-const updateProduct = asyncHandler(async(req,res)=>{
-    const product = await productModel.findById(req.params._id)
-    if(product){
-        const accessories = await productModel.findById(req.body.accessories)
-        if(accessories){
-            product.accessories.push(accessories)
-            await product.save()
-            res.json(product)
-        }
-    }else{
-        res.status(400)
-        throw new Error('product not found')
-    }
-})
-
-const deleteProduct = asyncHandler(async(req,res)=>{
-    const product = await productModel.findByIdAndRemove(req.params._id)
-})
-
-const createVariants =asyncHandler(async(req,res) =>{
-    const id_product = req.body.productId
-
-    try{
-        const product = await productModel.findById(id_product).populate("variants","countInStock")
-        console.log('product',product);
-        if(product){
-            const variant = await variantModel.create(req.body)
-            await variant.save()
-            product.variants.push(variant)
-            await product.save()
-            const cloneVariants = [...product.variants]
-            const totalCountInStock = cloneVariants.reduce((total,value)=>{
-                return total + value.countInStock
-            },0)
-            product.countInStock = totalCountInStock
-            await product.save()
-            res.json(product)
-        }
-        else{
-            res.status(404)
-            throw new Error('loi')
-        }
-    }catch(err){
-        throw new Error(err)
-    }
-    
-})
-
-const createColors =asyncHandler(async(req,res) =>{
-    const id_product = req.body.productId
-
-    try{
-        const product = await productModel.findById(id_product).populate('category')
-        console.log('product',product);
-        if(product){
-            const color = await colorModel.create(req.body)
-            await color.save()
-            product.colors.push(color)
-            await product.save()
-            res.json(
-                color
-            )
-        }
-        else{
-            res.status(404)
-            throw new Error('loi')
-        }
-    }catch(err){
-        throw new Error(err)
-    }
-    
-})
-
-const updateVariant = asyncHandler(async(req,res)=>{
-
-})
-
-const deleteVariant = asyncHandler(async(req,res)=>{
-
-})
-
-const creteaOrder = () => {};
 
 module.exports = {
-    creatAdmin,
-    createProduct,
-    createCategory,
-    updateProduct,
-    deleteProduct,
-    createVariants,
-    createColors,
-    updateVariant,
-    deleteVariant,
-}
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  createVariant,
+  updateVariant,
+  deleteVariant,
+  getAllOrder,
+  updateOrder,
+};
