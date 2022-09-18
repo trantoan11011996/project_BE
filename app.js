@@ -7,6 +7,7 @@ const connectDB = require('./config/db')
 const userRouter = require('./routes/userRouter')
 const productRouter = require('./routes/productRouter')
 const adminRouter = require('./routes/adminRouter')
+const {errHandle} = require('./middleware/middleware')
 connectDB()
 var app = express();
 // view engine setup

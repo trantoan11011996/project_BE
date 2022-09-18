@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const asyncHandler = require('express-async-handler')
-const User = require('../model/userModel')
+const userModel = require('../model/userModel')
 
 const protect = asyncHandler(async(req,res,next)=>{
         const authorization = req.headers.authorization
@@ -11,7 +11,7 @@ const protect = asyncHandler(async(req,res,next)=>{
                 // => lấy đc token ở vị trí số 1
                 const userVerify = jwt.verify(token,'masobimat')
                 // kiểm tra token nhập vào bear có hợp lệ với token đc cấp khi register hay k
-                const userInfo = await User.findById(userVerify.id).select("-password")
+                const userInfo = await userModel.findById(userVerify.id).select("-password")
                 req.userInfo = userInfo
                 console.log(req.userInfo)
                 next()
@@ -26,8 +26,9 @@ const protect = asyncHandler(async(req,res,next)=>{
 })
 
 const checkAdmin = asyncHandler(async(req,res,next)=>{
-    const user = await User.findById(req.userInfo._id)
+    const user = await userModel.findById(req.userInfo._id)
     if(user && user.isAdmin == true){
+        console.log('admin')
         next()
     }
     else{
