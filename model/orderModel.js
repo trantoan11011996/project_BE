@@ -7,15 +7,17 @@ const orderSchema = new Schema(
     status: {
       type: String,
       default: "pending",
+      required: true,
     },
     items: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "OrderProduct",
+        product: { type: Schema.Types.ObjectId, ref: "Product" },
+        quantity: { type: Number, required: true },
       },
     ],
     shippingAddress: {
       address: { type: String, required: true },
+      province: { type: String, required: true },
       city: { type: String, required: true },
       country: { type: String, required: true },
     },
