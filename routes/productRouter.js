@@ -1,11 +1,7 @@
-var express = require("express");
-const {
-  createProduct,
-  getAllProduct,
-  getProductById,getProductByCategory
-} = require("../controller/productController");
-const { createVariants } = require("../controller/variantController");
-const { protect, checkAdmin } = require("../middleware/authMiddleware");
+var express = require('express');
+const { getAllProduct, getProductDetail, getProductByCategory } = require('../controller/productController');
+
+
 var router = express.Router();
 
 // 1.
@@ -13,13 +9,13 @@ var router = express.Router();
 // route : GET /api/products/
 // access : public
 
-router.get("/");
+router.get('/',getAllProduct)
 // 2.
 // desc : get product detail
 // route GET /api/products/:id
 // access : public
 
-router.get("/:id", getProductById);
+router.get('/:id', getProductDetail)
 // 3.
 // desc : get product by category
 // route : GET /api/products/category/:name

@@ -1,36 +1,30 @@
+
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const variantSchema = mongoose.Schema(
   {
     productId: { type: Schema.Types.ObjectId, ref: "Product" },
-    titleOption: {
-      type: String,
+    image : {
+      type : String
     },
-    option: [
-      {
-        name: {
-          type: String,
-        },
-        price: {
-          type: Number,
-          required: true,
-        },
-        priceDiscount: {
-          type: Number,
-        },
-        image: {
-          type: String,
-          required: true,
-        },
-        countInStock: {
-          type: Number,
-          required: true,
-        },
-      },
-    ],
+    price : {
+      type : Number
+    },
+    discountPrice : {
+      type : Number
+    },
+    countInStock : {
+      type : Number
+    },
+    attributes : {
+      
+    }
   },
   { collection: "variants" }
 );
 
 const variantModel = mongoose.model("Variant", variantSchema);
 module.exports = variantModel;
+
+
+

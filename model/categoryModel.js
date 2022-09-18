@@ -3,6 +3,7 @@ const productModel = require("./productModel");
 
 const categorySchema = mongoose.Schema(
   {
+
     name: {
       type: String,
       required: true,

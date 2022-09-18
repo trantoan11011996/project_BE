@@ -2,20 +2,20 @@ const userModel = require("../model/userModel");
 const orderModel = require("../model/orderModel");
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../unitls/generateToken");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs")
 
 // create User
 
 const creatUser = asyncHandler(async (req, res) => {
   const { body } = req;
-  const userExist = await userModel.findOne({ email });
+  const userExist = await userModel.findOne({email : body.email});
   if (userExist) {
     res.status(400);
     res.json({
       message: "user have been exist",
     });
   }
-  const newUser = await userModel.create(body);
+  const newUser = await userModel.create(req.body);
   if (newUser) {
     res.status(200);
     res.json({
@@ -38,6 +38,7 @@ const loginUser = asyncHandler(async (req, res) => {
     res.json({
       name: user.name,
       email: user.email,
+      order: user.order,
       token: generateToken(user._id),
     });
   } else {
@@ -94,7 +95,7 @@ const getUser = asyncHandler(async (req, res) => {
 
 //get all user
 const getAllUser = asyncHandler(async (req, res) => {
-  const user = await userModel.find({});
+  const user = await userModel.find();
   if (user) {
     res.json(user);
   } else {
