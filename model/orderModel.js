@@ -51,36 +51,15 @@ const body = {
     },
   ],
 };
-// const order = await orderModel.create(req.body);
+const order = await orderModel.create(req.body);
 
-// order.item = body.item.map(async (value) => {
-//   const orderProduct = new orderProductModel();
-//   orderProduct.order = order._id;
-//   orderProduct.product = value.idProduct;
-//   orderProduct.qty = value.qty;
-//   await orderProduct.save();
-//   return orderProduct;
-
-// });
-
-// let newItems = [];
-// for (let item of body.item ){
-//   const orderProduct = new orderProductModel();
-//   orderProduct.order = order._id;
-//   orderProduct.product = item.idProduct;
-//   orderProduct.qty = item.qty;
-//   await orderProduct.save();
-//   newItems.push(orderProduct)
-// }
-// order.item = newItems;
-
-// const body = {
-//   name:"",
-//   age:"",
-//   address:"",
-// }
-// Schema1.name = body.name;
-
-// Schema1,
-// Schema2,
-// Schema3,
+let newItems = [];
+for (let item of body.item) {
+  const orderProduct = new orderProductModel();
+  orderProduct.order = order._id;
+  orderProduct.product = item.idProduct;
+  orderProduct.qty = item.qty;
+  await orderProduct.save();
+  newItems.push(orderProduct);
+}
+order.item = newItems;
