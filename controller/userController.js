@@ -2,13 +2,13 @@ const userModel = require("../model/userModel");
 const orderModel = require("../model/orderModel");
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../unitls/generateToken");
-const bcrypt = require("bcryptjs")
+const bcrypt = require("bcryptjs");
 
 // create User
 
 const creatUser = asyncHandler(async (req, res) => {
   const { body } = req;
-  const userExist = await userModel.findOne({email : body.email});
+  const userExist = await userModel.findOne({ email: body.email });
   if (userExist) {
     res.status(400);
     res.json({
@@ -130,7 +130,6 @@ const createOrder = asyncHandler(async (req, res) => {
     const order = new orderModel();
     order.user = idUser;
     order.shippingAddress = body.shippingAddress;
-        
   } else {
     res.status(404);
     throw new Error("User is not exist");

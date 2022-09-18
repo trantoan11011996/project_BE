@@ -11,9 +11,13 @@ const orderSchema = new Schema(
       required: true,
     },
     items: [
+      // {
+      //   variant: { type: Schema.Types.ObjectId, ref: "Variant" },
+      //   quantity: { type: Number, required: true },
+      // },
       {
-        product: { type: Schema.Types.ObjectId, ref: "Product" },
-        quantity: { type: Number, required: true },
+        type: Schema.Types.ObjectId,
+        ref: "OrderProduct",
       },
     ],
     shippingAddress: {
@@ -22,15 +26,17 @@ const orderSchema = new Schema(
       city: { type: String, required: true },
       country: { type: String, required: true },
     },
-    shippingPrice: { type: Number },
-    totalPrice: { type: Number },
+    shippingPrice: { type: Number, required: true },
+    totalPrice: { type: Number, required: true },
     createAt: {
-      type: Date,
+      type: String,
       required: true,
+      default: Date(),
     },
     updateAt: {
-      type: Date,
+      type: String,
       required: true,
+      default: Date(),
     },
   },
   { collection: "orders" }
@@ -53,15 +59,15 @@ const body = {
     },
   ],
 };
-const order = await orderModel.create(req.body);
+// const order = await orderModel.create(req.body);
 
-let newItems = [];
-for (let item of body.item) {
-  const orderProduct = new orderProductModel();
-  orderProduct.order = order._id;
-  orderProduct.product = item.idProduct;
-  orderProduct.qty = item.qty;
-  await orderProduct.save();
-  newItems.push(orderProduct);
-}
-order.item = newItems;
+// let newItems = [];
+// for (let item of body.item) {
+//   const orderProduct = new orderProductModel();
+//   orderProduct.order = order._id;
+//   orderProduct.product = item.idProduct;
+//   orderProduct.qty = item.qty;
+//   await orderProduct.save();
+//   newItems.push(orderProduct);
+// }
+// order.item = newItems;
