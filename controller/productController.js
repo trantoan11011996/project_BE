@@ -7,9 +7,47 @@ const asyncHandler = require("express-async-handler");
 
 const getProductDetail = asyncHandler(async(req,res)=>{
     const product = await productModel.findById(req.params.id).populate("variants").populate('category')
+    const variants = product.variants
+    let arrAtributes = []
+    for(let i = 0 ; i<variants.length; i++){
+        const attributes = variants[i].attributes
+        for(let j = 0 ; j < attributes.length;j++){
+            arrAtributes.push(attributes[j]);
+        }
+    }
+    arrAtributes = arrAtributes.filter((value,index,self)=>
+        index === self.findIndex((t)=>(
+            t.name === value.name && t.value === value.value 
+        ))
+    )
+    var seen = {};
+    arrAtributes = arrAtributes.filter(function(item) {
+    var previous;
+
+    // chưa có thuộc tính này đúng không => chưa => true=>thêm vào
+    if (seen.hasOwnProperty(item.name)) {
+        console.log(seen)
+        // Yes, grab it and add this value to it
+        previous = seen[item.name]
+        previous.value.push(item.value);
+
+        // Don't keep this item, we've merged it into the previous one
+        return false;
+    }
+
+    // item.value probably isn't an array; make it one for consistency
+    if (!Array.isArray(item.value)) {
+        item.value = [item.value];
+    }
+
+    // Remember that we've seen it
+    seen[item.name] = item;
+
+    // Keep this one, we'll merge any others that match into it
+    return true;
+});
     if(product){
-        res.status(200)
-        res.json(product)
+        res.json({product,arrAtributes})
     }
     else{
         res.status(404)
