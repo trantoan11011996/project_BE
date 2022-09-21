@@ -24,4 +24,8 @@ router.get('/:id', getProductDetail)
 
 router.get("/category/:id", getProductByCategory);
 
+// 4.
+// desc : get product filtered
+// route : GET /api/products/filter
+
 module.exports = router;
