@@ -7,43 +7,43 @@ const productSchema = mongoose.Schema(
       required: true,
     },
     desc: {
-      titleDesc : {
-        type : String,
+      titleDesc: {
+        type: String,
       },
-      option : [
+      option: [
         {
-          titleOption  : {
-            type : String
+          titleOption: {
+            type: String,
           },
-          listOption : []
-        }
+          listOption: [],
+        },
       ],
       video_link: {
-        type: String
+        type: String,
       },
     },
-    imageMain : {type : String, require : true},
+    imageMain: { type: String, require: true },
     imageDetails: [
       {
         type: String,
         required: true,
       },
     ],
-    price : {
-      type : Number,
-      required : true
+    price: {
+      type: Number,
+      required: true,
     },
     category: { type: Schema.Types.ObjectId, ref: "Category" },
-    accessories : [{type : Schema.Types.ObjectId, ref : "Product"}],
-    variants:  [{ type: Schema.Types.ObjectId, ref: "Variant" }],
-    countInStock : {
-      type : Number,
+    accessories: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+    variants: [{ type: Schema.Types.ObjectId, ref: "Variant" }],
+    countInStock: {
+      type: Number,
     },
-    isTrending : {
-      type : Boolean,
+    isTrending: {
+      type: Boolean,
     },
-    productType : {
-      name : String,
+    productType: {
+      name: String,
     },
   },
   { collection: "products" }
