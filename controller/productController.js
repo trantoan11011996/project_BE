@@ -2,20 +2,24 @@ const productModel = require("../model/productModel");
 const variantModel = require("../model/productVariantModel");
 const categoryModel = require("../model/categoryModel");
 const asyncHandler = require("express-async-handler");
+const { find } = require("../model/productModel");
 
 const getProductDetail = asyncHandler(async (req, res) => {
   const product = await productModel
     .findById(req.params.id)
     .populate("variants")
     .populate("category");
+
   const variants = product.variants;
   let arrAtributes = [];
+
   for (let i = 0; i < variants.length; i++) {
     const attributes = variants[i].attributes;
     for (let j = 0; j < attributes.length; j++) {
       arrAtributes.push(attributes[j]);
     }
   }
+  // lọc trùng
   arrAtributes = arrAtributes.filter(
     (value, index, self) =>
       index ===
@@ -66,6 +70,11 @@ const getProductByCategory = asyncHandler(async (req, res) => {
       message: "product can not found",
     });
   }
+});
+
+const getAllCategory = asyncHandler(async (req, res) => {
+  const allCategory = await categoryModel.find();
+  res.json(allCategory);
 });
 
 const getAllProduct = asyncHandler(async (req, res) => {
@@ -123,9 +132,8 @@ const getAllProduct = asyncHandler(async (req, res) => {
 });
 
 const createProduct = asyncHandler(async (req, res) => {
-  const getAllCategory = await categoryModel.find();
   const product = await productModel.create(req.body);
-  res.json({ getAllCategory, product });
+  res.json(product);
 });
 
 const createVariants = asyncHandler(async (req, res) => {
@@ -135,16 +143,18 @@ const createVariants = asyncHandler(async (req, res) => {
     const product = await productModel
       .findById(id_product)
       .populate("variants", "countInStock");
-    console.log("product", product);
+
     if (product) {
       const variant = await variantModel.create(req.body);
-      await variant.save();
+
       product.variants.push(variant);
       await product.save();
+
       const cloneVariants = [...product.variants];
       const totalCountInStock = cloneVariants.reduce((total, value) => {
         return total + value.countInStock;
       }, 0);
+
       product.countInStock = totalCountInStock;
       await product.save();
       res.json(product);
@@ -156,9 +166,9 @@ const createVariants = asyncHandler(async (req, res) => {
     throw new Error(err);
   }
 });
+
 const createCategory = asyncHandler(async (req, res) => {
   const category = await categoryModel.create(req.body);
-  await category.save();
   res.json(category);
 });
 
@@ -179,6 +189,29 @@ const updateProduct = asyncHandler(async (req, res) => {
 });
 
 const updateVariant = asyncHandler(async (req, res) => {
+  const idProduct = req.params.id;
+
+  let product = await productModel.findById(idProduct).populate("variants");
+  if (product) {
+    const variant = await variantModel.findByIdAndUpdate(
+      req.body.idVariant,
+      req.body,
+      { new: true }
+    );
+    product = await productModel.findById(idProduct).populate("variants");
+    const cloneVariants = [...product.variants];
+    const totalCountInStock = cloneVariants.reduce((total, value) => {
+      return total + value.countInStock;
+    }, 0);
+
+    product.countInStock = totalCountInStock;
+    bn;
+    await product.save();
+    res.json({ product, variant });
+  } else {
+    res.status(404);
+    throw new Error("Product not exist");
+  }
   /////
 });
 
@@ -197,9 +230,11 @@ module.exports = {
   getProductByCategory,
   createProduct,
   createCategory,
+  getAllCategory,
   createVariants,
   deleteProduct,
   updateProduct,
   updateVariant,
   deleteVariant,
 };
+
