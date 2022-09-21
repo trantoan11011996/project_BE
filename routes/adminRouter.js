@@ -13,6 +13,7 @@ const {
   createVariants,
   updateVariant,
   deleteVariant,
+  getAllCategory
 } = require("../controller/productController");
 const {
   getAllUser,
@@ -22,6 +23,11 @@ const {
 const { protect, checkAdmin } = require("../middleware/authMiddleware");
 const router = express();
 
+
+//desc : get all category
+//route : GET /api/admin/category
+//access : public
+router.get("/category",protect,getAllCategory)
 // desc : create new category
 // route : POST /api/admin/product
 // access : private - admin
