@@ -25,7 +25,7 @@ const getProductDetail = asyncHandler(async (req, res) => {
   arrAtributes = arrAtributes.filter(function (item) {
     var previous;
 
-    // chưa có thuộc tính này đúng không => chưa => true=>thêm vào
+    // 
     if (seen.hasOwnProperty(item.name)) {
       console.log(seen);
       // Yes, grab it and add this value to it
@@ -178,19 +178,18 @@ const updateProduct = asyncHandler(async (req, res) => {
   }
 });
 
-const updateVariant = asyncHandler(async (req, res) => {
-  /////
-});
+const deleteProduct = asyncHandler(async(req,res)=>{
+    const product = await productModel.findByIdAndRemove(req.params._id)
+    res.json({
+        message : "xóa thành công"
+    })
+})
 
-const deleteProduct = asyncHandler(async (req, res) => {
-  const product = await productModel.findByIdAndRemove(req.params._id);
-  ////
-});
 
-const deleteVariant = asyncHandler(async (req, res) => {
-  /////
-});
-
+const getVariant = asyncHandler(async(req,res)=>{
+    const variant = await variantModel.findById(req.params.id)
+    res.json(variant)
+})
 module.exports = {
   getProductDetail,
   getAllProduct,
@@ -202,4 +201,5 @@ module.exports = {
   updateProduct,
   updateVariant,
   deleteVariant,
+  getVariant
 };
