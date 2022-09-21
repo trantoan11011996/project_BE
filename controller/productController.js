@@ -3,13 +3,22 @@ const variantModel = require("../model/productVariantModel");
 const categoryModel = require("../model/categoryModel");
 const asyncHandler = require("express-async-handler");
 
+
+const getAllCategory = asyncHandler(async(req,res)=>{
+  const allCategory = await categoryModel.find()
+  res.json(allCategory)
+})
 const getProductDetail = asyncHandler(async (req, res) => {
   const product = await productModel
     .findById(req.params.id)
+    .select("-imageMain")
     .populate("variants")
     .populate("category");
-  const variants = product.variants;
+
+  const variants = product.variants
+
   let arrAtributes = [];
+
   for (let i = 0; i < variants.length; i++) {
     const attributes = variants[i].attributes;
     for (let j = 0; j < attributes.length; j++) {
@@ -21,34 +30,19 @@ const getProductDetail = asyncHandler(async (req, res) => {
       index ===
       self.findIndex((t) => t.name === value.name && t.value === value.value)
   );
-  var seen = {};
-  arrAtributes = arrAtributes.filter(function (item) {
-    var previous;
+  const result = Array.from(new Set(arrAtributes.map(s => s.name)))
+    .map(lab => {
+      return {
+        name: lab,
+        value: arrAtributes.filter(s => s.name === lab).map(edition => edition.value)
+      }
+    })
 
-    // 
-    if (seen.hasOwnProperty(item.name)) {
-      console.log(seen);
-      // Yes, grab it and add this value to it
-      previous = seen[item.name];
-      previous.value.push(item.value);
-
-      // Don't keep this item, we've merged it into the previous one
-      return false;
-    }
-
-    // item.value probably isn't an array; make it one for consistency
-    if (!Array.isArray(item.value)) {
-      item.value = [item.value];
-    }
-
-    // Remember that we've seen it
-    seen[item.name] = item;
-
-    // Keep this one, we'll merge any others that match into it
-    return true;
-  });
   if (product) {
-    res.json({ product, arrAtributes });
+    // const variantProduct = product.variants
+    console.log('attributes',arrAtributes)
+    console.log('variant',variants[0])
+    res.json({ product,result });
   } else {
     res.status(404);
     throw new Error("product cant not found");
@@ -81,6 +75,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
   let arr = [];
   if (search) {
     arr.push({ name: { $regex: search } });
+    console.log(arr)
   }
   if (countInStock == 1) {
     arr.push({ countInStock: { $gt: 0 } });
@@ -117,15 +112,15 @@ const getAllProduct = asyncHandler(async (req, res) => {
     .limit(pageSize)
     .skip(pageSize * (page - 1))
     .sort(`${a}`)
+    .select("-desc -imageDetails -variants")
     .populate("category", "name");
   const allCategory = await categoryModel.find();
   res.json({ allProduct, allCategory });
 });
 
 const createProduct = asyncHandler(async (req, res) => {
-  const getAllCategory = await categoryModel.find();
   const product = await productModel.create(req.body);
-  res.json({ getAllCategory, product });
+  res.json( product );
 });
 
 const createVariants = asyncHandler(async (req, res) => {
@@ -134,7 +129,7 @@ const createVariants = asyncHandler(async (req, res) => {
   try {
     const product = await productModel
       .findById(id_product)
-      .populate("variants", "countInStock");
+      .populate("variants", "countInStock price discountPrice");
     console.log("product", product);
     if (product) {
       const variant = await variantModel.create(req.body);
@@ -146,6 +141,17 @@ const createVariants = asyncHandler(async (req, res) => {
         return total + value.countInStock;
       }, 0);
       product.countInStock = totalCountInStock;
+      const arrPrice = []
+      cloneVariants.forEach((item)=>{
+        if(item.discountPrice){
+          arrPrice.push(item.discountPrice)
+        }else{
+          arrPrice.push(item.price)
+        }
+      })
+      console.log(arrPrice)
+      const minPrice = Math.min(...arrPrice)
+      product.price = minPrice
       await product.save();
       res.json(product);
     } else {
@@ -163,32 +169,92 @@ const createCategory = asyncHandler(async (req, res) => {
 });
 
 const updateProduct = asyncHandler(async (req, res) => {
-  const product = await productModel.findById(req.params._id);
-  if (product) {
-    await product.save();
-    const accessories = await productModel.findById(req.body.accessories);
-    if (accessories) {
-      product.accessories.push(accessories);
-      await product.save();
-      res.json(product);
-    }
-  } else {
-    res.status(404);
-    throw new Error("product not found");
-  }
+  const product = await productModel.findByIdAndUpdate(req.params.id,req.body,{new : true})
+  res.json(product)
 });
-
-const deleteProduct = asyncHandler(async(req,res)=>{
-    const product = await productModel.findByIdAndRemove(req.params._id)
-    res.json({
-        message : "xóa thành công"
-    })
-})
 
 
 const getVariant = asyncHandler(async(req,res)=>{
-    const variant = await variantModel.findById(req.params.id)
-    res.json(variant)
+  const variant = await variantModel.findById(req.params.id)
+  res.json(variant)
+})
+
+
+const updateVariant = asyncHandler(async (req, res) => {
+  const idProduct = req.params.id;
+
+  let product = await productModel.findById(idProduct).populate("variants");
+  if (product) {
+    const variant = await variantModel.findByIdAndUpdate(
+      req.body.idVariant,
+      req.body,
+      { new: true }
+      );
+    product = await productModel.findById(idProduct).populate("variants");
+    const cloneVariants = [...product.variants];
+    const totalCountInStock = cloneVariants.reduce((total, value) => {
+      return total + value.countInStock;
+    }, 0);
+
+    product.countInStock = totalCountInStock;
+    bn;
+    await product.save();
+    res.json({ product, variant });
+  } else {
+    res.status(404);
+    throw new Error("Product not exist");
+  }
+  /////
+});
+
+const deleteProduct = asyncHandler(async(req,res)=>{
+const product = await productModel.findById(req.params.id)
+if(product){
+  const allVariant = await variantModel.deleteMany({productId : product._id})
+  await product.remove()
+  res.json({
+    message : "delete success"
+  })
+}else{
+  res.status(404)
+  throw new Error(`can't delete because product can't found`)
+}
+
+})
+
+const deleteVariant = asyncHandler(async(req,res)=>{
+      const variant = await variantModel.findById(req.params.id)
+      if(variant){
+        const product = await productModel.findById(variant.productId).populate('variants','countInStock price discountPrice')
+        let cloneVariant = [...product.variants]
+        cloneVariant = cloneVariant.filter((item)=>{
+          return String(item._id) != String(variant._id)
+        })
+        const arrPrice = []
+        cloneVariant.forEach((item)=>{
+          if(item.discountPrice ){
+            arrPrice.push(item.discountPrice)
+          }else{
+            arrPrice.push(item.price)
+          }
+        })
+        const minPrice = Math.min(...arrPrice)
+        product.price = minPrice
+        const totalCountInStock = cloneVariant.reduce((total,item)=>{
+            return total + item.countInStock
+        },0)
+        console.log('total',totalCountInStock)
+        product.countInStock = totalCountInStock
+        product.variants = cloneVariant
+        await product.save()
+        await variant.remove()
+        res.json({
+          message : "delete success"
+        })
+      }else{
+        res.status(404)
+        throw new Error('variant can not found')
+      }
 })
 module.exports = {
   getProductDetail,
@@ -201,5 +267,6 @@ module.exports = {
   updateProduct,
   updateVariant,
   deleteVariant,
-  getVariant
+  getVariant,
+  getAllCategory
 };
