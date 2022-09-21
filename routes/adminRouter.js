@@ -3,6 +3,7 @@ const {
   createOrder,
   updateOrder,
   getAllOrder,
+  deleteOrder,
 } = require("../controller/orderController");
 const {
   createProduct,
@@ -65,7 +66,7 @@ router.delete("/variant/:id", deleteVariant);
 // desc : get all user
 // route : GET /api/users/
 // access : private - admin
-router.get("/user", protect,checkAdmin, getAllUser);
+router.get("/user", protect, checkAdmin, getAllUser);
 
 // 9
 // desc : get user by id
@@ -96,5 +97,11 @@ router.post("/order", protect, checkAdmin, createOrder);
 // route : PUT /api/admin/order:id
 // access : private - admin
 router.put("/order/:id", protect, checkAdmin, updateOrder);
+
+// 14
+// desc : delete order
+// route : DEL /api/admin/order:id
+// access : private - login
+router.delete("/order/:id", protect, deleteOrder);
 
 module.exports = router;
