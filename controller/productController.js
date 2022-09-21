@@ -5,28 +5,23 @@ const asyncHandler = require("express-async-handler");
 
 
 
+let arrAtributes = []   
 const getProductDetail = asyncHandler(async(req,res)=>{
-    const product = await productModel.findById(req.params.id).populate("variants").populate('category')
+    const product = await productModel.findById(req.params.id).populate('variants').populate('category')
     const variants = product.variants
-    let arrAtributes = []
     for(let i = 0 ; i<variants.length; i++){
-        const attributes = variants[i].attributes
-        for(let j = 0 ; j < attributes.length;j++){
-            arrAtributes.push(attributes[j]);
+        const att = variants[i].attributes
+        for(let j = 0 ; j < att.length;j++){
+            arrAtributes.push(att[j]);
         }
     }
-    arrAtributes = arrAtributes.filter((value,index,self)=>
-        index === self.findIndex((t)=>(
-            t.name === value.name && t.value === value.value 
-        ))
-    )
+    console.log(arrAtributes)
     var seen = {};
     arrAtributes = arrAtributes.filter(function(item) {
-    var previous;
+        var previous;
 
-    // chưa có thuộc tính này đúng không => chưa => true=>thêm vào
+    // 
     if (seen.hasOwnProperty(item.name)) {
-        console.log(seen)
         // Yes, grab it and add this value to it
         previous = seen[item.name]
         previous.value.push(item.value);
@@ -89,18 +84,18 @@ const createVariants =asyncHandler(async(req,res) =>{
     const id_product = req.body.productId
 
     try{
-        const product = await productModel.findById(id_product).populate("variants","countInStock")
+        const product = await productModel.findById(id_product).populate("variants")
         console.log('product',product);
         if(product){
             const variant = await variantModel.create(req.body)
             await variant.save()
             product.variants.push(variant)
             await product.save()
-            const cloneVariants = [...product.variants]
-            const totalCountInStock = cloneVariants.reduce((total,value)=>{
-                return total + value.countInStock
-            },0)
-            product.countInStock = totalCountInStock
+            // const cloneVariants = [...product.variants]
+            // const totalCountInStock = cloneVariants.reduce((total,value)=>{
+            //     return total + value.countInStock
+            // },0)
+            // product.countInStock = totalCountInStock
             await product.save()
             res.json(product)
         }
@@ -144,14 +139,19 @@ const updateVariant = asyncHandler(async(req,res)=>{
 
 const deleteProduct = asyncHandler(async(req,res)=>{
     const product = await productModel.findByIdAndRemove(req.params._id)
-    ////
+    res.json({
+        message : "xóa thành công"
+    })
 })
 
 const deleteVariant = asyncHandler(async(req,res)=>{    
     /////    
 })
 
-
+const getVariant = asyncHandler(async(req,res)=>{
+    const variant = await variantModel.findById(req.params.id)
+    res.json(variant)
+})
 module.exports = {
   getProductDetail,
   getAllProduct,
@@ -163,4 +163,5 @@ module.exports = {
   updateProduct,
   updateVariant,
   deleteVariant,
+  getVariant
 };
