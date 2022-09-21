@@ -6,8 +6,9 @@ const {
   deleteOrder,
 } = require("../controller/orderController");
 const {
-  createProduct,
   createCategory,
+  getAllCategory,
+  createProduct,
   updateProduct,
   deleteProduct,
   createVariants,
@@ -32,6 +33,7 @@ router.get("/category",protect,getAllCategory)
 // route : POST /api/admin/product
 // access : private - admin
 router.post("/category", createCategory);
+router.get("/category", getAllCategory);
 
 // desc : create new product  => return category
 // route : POST /api/admin/product
