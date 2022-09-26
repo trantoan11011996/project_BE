@@ -138,6 +138,7 @@ const getAllUser = asyncHandler(async (req, res) => {
   const page = req.query.pageNumber || 1;
   const user = await userModel
     .find()
+    .populate('order')  
     .limit(pageSize)
     .skip(pageSize * (page - 1));
   if (user) {
