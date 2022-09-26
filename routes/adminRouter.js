@@ -7,14 +7,13 @@ const {
 } = require("../controller/orderController");
 const {
   createCategory,
-  getAllCategory,
   createProduct,
   updateProduct,
   deleteProduct,
   createVariants,
   updateVariant,
   deleteVariant,
-  getAllCategory
+  getAllCategory,
 } = require("../controller/productController");
 const {
   getAllUser,
@@ -24,11 +23,10 @@ const {
 const { protect, checkAdmin } = require("../middleware/authMiddleware");
 const router = express();
 
-
 //desc : get all category
 //route : GET /api/admin/category
 //access : public
-router.get("/category",protect,getAllCategory)
+router.get("/category", protect, getAllCategory);
 // desc : create new category
 // route : POST /api/admin/product
 // access : private - admin
@@ -98,7 +96,7 @@ router.get("/order", protect, checkAdmin, getAllOrder);
 // desc : create order
 // route : POST /api/admin/order:id
 // access : private - admin
-router.post("/order", protect, checkAdmin, createOrder);
+router.post("/order", protect, createOrder);
 
 // 13
 // desc : update status order

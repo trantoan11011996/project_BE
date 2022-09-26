@@ -22,7 +22,7 @@ const orderSchema = new Schema(
     ],
     shippingAddress: {
       address: { type: String, required: true },
-      province: { type: String, required: true },
+      district: { type: String, required: true },
       city: { type: String, required: true },
       country: { type: String, required: true },
     },
@@ -44,30 +44,3 @@ const orderSchema = new Schema(
 
 const orderModel = mongoose.model("Order", orderSchema);
 module.exports = orderModel;
-
-const body = {
-  name: "",
-  age: "",
-  item: [
-    {
-      idProduct: "product1",
-      qty: "1",
-    },
-    {
-      idProduct: "product2",
-      qty: "2",
-    },
-  ],
-};
-// const order = await orderModel.create(req.body);
-
-// let newItems = [];
-// for (let item of body.item) {
-//   const orderProduct = new orderProductModel();
-//   orderProduct.order = order._id;
-//   orderProduct.product = item.idProduct;
-//   orderProduct.qty = item.qty;
-//   await orderProduct.save();
-//   newItems.push(orderProduct);
-// }
-// order.item = newItems;
