@@ -62,7 +62,7 @@ router.post("/forgotpassword", forgotPassword);
 
 ////// 12
 // desc : create order
-// route : POST /api/admin/order:id
-// access : private - admin
+// route : POST /api/user/order
+// access : token
 router.post("/order", protect, createOrder);
 module.exports = router;
