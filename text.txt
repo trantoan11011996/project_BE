@@ -6,3 +6,60 @@ variantDisplay = [
 ////// price => dựa vào variant 
 //// nếu variant.length = 0 => price của product = req.body.total price
 /// nếu variant.length >= 1 => price của product = min price của variant
+
+
+// POST create order
+url("/api/admin/order")
+headers : {
+    authorization : token
+}
+body = {
+    items : [
+        {
+            variant : ObjectId,
+            qty : Number
+        }
+    ],
+    shippingAddress : {
+        "city" : String,
+        "address" : String,
+        "province" : String,
+    },
+    shippingPrice : String
+}
+
+// PUT update order
+url("/api/admin/order/idOrder")
+headers : {
+    authorization : token
+}
+body = {
+    status : String
+}
+
+// DEL delete order
+url("/api/admin/order/idOrder")
+
+// POST paypalgateway
+url("/api/users/paypalgateway")
+headers : {
+    authorization : token
+}
+body : {
+    shippingPrice : Number,
+    items : [
+        {
+            "name":"Kit",
+            "sku":"004", // day la id
+            "quantity":1,
+            "price":90.00,
+            "currency":"USD"
+        },
+    ]
+
+}
+
+// POST forgot password
+body : {
+    email : String
+}

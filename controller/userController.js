@@ -3,9 +3,41 @@ const orderModel = require("../model/orderModel");
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../unitls/generateToken");
 const bcrypt = require("bcryptjs");
+const paypal = require("paypal-rest-sdk");
+const nodemailer = require("nodemailer");
+
+// setup paypal ---------------------------------------------------
+
+const data = {
+  shippingPrice: "17.00",
+  items: [
+    {
+      name: "Iphone 4S",
+      sku: "001",
+      price: "25.00",
+      currency: "USD",
+      quantity: 1,
+    },
+    {
+      name: "Iphone XS",
+      sku: "002",
+      price: "252.00",
+      currency: "USD",
+      quantity: 1,
+    },
+    {
+      name: "Iphone X",
+      sku: "003",
+      price: "252.00",
+      currency: "USD",
+      quantity: 1,
+    },
+  ],
+};
+
+let total = 0;
 
 // create User
-
 const createUser = asyncHandler(async (req, res) => {
   const { body } = req;
   const userExist = await userModel.findOne({ email: body.email });
@@ -42,15 +74,23 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const getProfileUser = asyncHandler(async (req, res) => {
-  const user = await userModel.findById(req.userInfo._id);
+  const user = await userModel.findById(req.userInfo._id).populate({
+    path: "items",
+    select: "-_id -order",
+    populate: {
+      path: "variant",
+      select: "discountPrice price productId attributes -_id",
+      populate: { path: "productId", select: "name -_id" },
+    },
+  });
   res.json({
     email: user.email,
     name: user.name,
     order: user.order,
   });
 });
-//update user
 
+//update user
 const updateUser = asyncHandler(async (req, res) => {
   const user = await userModel.findById(req.userInfo._id);
 
@@ -110,7 +150,7 @@ const getAllUser = asyncHandler(async (req, res) => {
 
 // delete
 const deleteUser = asyncHandler(async (req, res) => {
-  ///liên quan đến  order 
+  ///liên quan đến  order
   const user = await userModel.findById(req.params.id);
   if (user) {
     await user.remove();
@@ -123,19 +163,161 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
-const createOrder = asyncHandler(async (req, res) => {
-  const idUser = req.params.id;
-  const body = { ...req.body };
+const payViaPayPalGateWay = asyncHandler(async (req, res) => {
+  paypal.configure({
+    mode: "sandbox", //sandbox or live
+    client_id:
+      "AS6meJ8_3UfNvv_aMtviqprju9n2U6tFh4jm-gYw8SlnFOt0LzMH_GkK3ckj7FDXiG5dvea8ynzeqJOA",
+    client_secret:
+      "EKtM69xiFvknj4y3huTvLk1QjN-23yObV4FvS7jKXVOtATK_P5tskNgHuIz4dJItFBZu6xwWXcsKxFCa",
+  });
 
-  const user = await userModel.findById(idUser);
-  if (user) {
-    const order = new orderModel();
-    order.user = idUser;
-    order.shippingAddress = body.shippingAddress;
+  const avgShippingPrice = req.body.shippingPrice / req.body.items.length;
+  for (let value of req.body.items) {
+    value.price = Number(value.price) + Math.round(avgShippingPrice);
+    total += Number(value.price) * Number(value.quantity);
+  }
+
+  const create_payment_json = {
+    intent: "sale",
+    payer: {
+      payment_method: "paypal",
+    },
+    redirect_urls: {
+      return_url: "http://localhost:5000/success",
+      cancel_url: "http://localhost:5000/cancel",
+    },
+    transactions: [
+      {
+        item_list: {
+          items: req.body.items,
+        },
+        amount: {
+          currency: "USD",
+          total: String(total),
+        },
+        description: "Iphone 4S cũ giá siêu rẻ",
+      },
+    ],
+  };
+
+  paypal.payment.create(create_payment_json, function (error, payment) {
+    if (error) {
+      throw error;
+    } else {
+      for (let i = 0; i < payment.links.length; i++) {
+        if (payment.links[i].rel === "approval_url") {
+          res.redirect(payment.links[i].href);
+        }
+      }
+    }
+  });
+});
+
+const getSuccessForPaypal = asyncHandler((req, res) => {
+  const payerId = req.query.PayerID;
+  const paymentId = req.query.paymentId;
+
+  const execute_payment_json = {
+    payer_id: payerId,
+    transactions: [
+      {
+        amount: {
+          currency: "USD",
+          total: String(total),
+        },
+      },
+    ],
+  };
+  paypal.payment.execute(
+    paymentId,
+    execute_payment_json,
+    function (error, payment) {
+      if (error) {
+        console.log(error.response);
+        throw error;
+      } else {
+        console.log(JSON.stringify(payment));
+        res.send("Success (Mua hàng thành công)");
+      }
+    }
+  );
+});
+
+const getCancelForPaypal = asyncHandler((req, res) => {
+  res.send("Cancelled (Đơn hàng đã hủy)");
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  // create random string for new password
+  const generateString = (n = 5) => {
+    var text = "";
+    var possible =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < n; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+  };
+  const newPassword = generateString();
+
+  // create reusable transporter object using the default SMTP transport
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "ducvietb79@gmail.com", // generated ethereal user
+      pass: "aavfpodadmnwyfwd", // generated ethereal password
+    },
+  });
+
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    from: "ducvietb79@gmail.com", // sender address
+    to: "phuongdaibang111@gmail.com", // list of receivers
+    subject: "Change your password", // Subject line
+    html: ` 
+    <h2>Hello ${req.body.email} !</h2>
+    <p>Your new password</p>
+    <h1>${newPassword}</h1>
+    `, // html body
+  });
+  if (info) {
+    const user = await userModel.findOne({ email: req.body.email });
+    user.password = newPassword;
+    await user.save();
+    res.json("success");
   } else {
     res.status(404);
-    throw new Error("User is not exist");
+    throw new Error("fail");
   }
+
+  //_---------------------------------------------
+
+  // transporter.verify(function (error, success) {
+  //   // Nếu có lỗi.
+  //   if (error) {
+  //     console.log(error);
+  //   } else {
+  //     //Nếu thành công.
+  //     console.log("Kết nối thành công!");
+  //     var mail = {
+  //       from: "ducvietb79.com@gmail.com", // Địa chỉ email của người gửi
+  //       to: "phuongdaibang111@gmail.com, admin@toicode.com", // Địa chỉ email của người gửi
+  //       subject: "Thư được gửi bằng Node.js", // Tiêu đề mail
+  //       text: "Toidicode.com học lập trình online miễn phí", // Nội dung mail dạng text
+  //     };
+  //     //Tiến hành gửi email
+  //     transporter.sendMail(mail, function (error, info) {
+  //       if (error) {
+  //         // nếu có lỗi
+  //         console.log(error);
+  //       } else {
+  //         //nếu thành công
+  //         console.log("Email sent: " + info.response);
+  //       }
+  //     });
+  //   }
+  // });
 });
 
 module.exports = {
@@ -146,4 +328,8 @@ module.exports = {
   getUser,
   getAllUser,
   deleteUser,
+  payViaPayPalGateWay,
+  getSuccessForPaypal,
+  getCancelForPaypal,
+  forgotPassword,
 };

@@ -4,6 +4,9 @@ const {
   loginUser,
   updateUser,
   getProfileUser,
+  payViaPayPalGateWay,
+  getSuccessForPaypal,
+  getCancelForPaypal,forgotPassword
 } = require("../controller/userController");
 const { protect, checkAdmin } = require("../middleware/authMiddleware");
 var router = express.Router();
@@ -32,6 +35,28 @@ router.get("/profile", protect, getProfileUser);
 // access : user
 router.put("/profile", protect, updateUser);
 
+// 5.
+// desc : pay for order
+// router POST /api/users/paypalgateway
+// access : user
+router.post("/paypalgateway",protect, payViaPayPalGateWay);
 
+// 6.
+// desc : noti success for paypal
+// router GET /api/users/success
+// access : user
+router.get("/success", protect, getSuccessForPaypal);
+
+// 7.
+// desc : noti fail for paypal
+// router GET /api/users/fail
+// access : user
+router.get("/cancel", protect, getCancelForPaypal);
+
+// 8.
+// desc : forgot password
+// router POST /api/users/forgotpassword
+// access : public
+router.post("/forgotpassword", forgotPassword);
 
 module.exports = router;

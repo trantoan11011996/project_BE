@@ -8,11 +8,18 @@ const userRouter = require("./routes/userRouter");
 const productRouter = require("./routes/productRouter");
 const adminRouter = require("./routes/adminRouter");
 const { errHandle } = require("./middleware/middleware");
+
 connectDB();
 var app = express();
+
+app.get("/", (req, res) => {
+  res.render("paypal.ejs");
+});
+
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "jade");
+app.set("view engine", "ejs");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -28,7 +35,7 @@ app.use("/api/admin", adminRouter);
 app.use(function (req, res, next) {
   next(createError(404));
 });
-app.use(errHandle);
+// app.use(errHandle);
 // error handler
 // app.use(function(err, req, res, next) {
 //   // set locals, only providing error in development

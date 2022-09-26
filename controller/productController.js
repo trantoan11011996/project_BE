@@ -2,7 +2,6 @@ const productModel = require("../model/productModel");
 const variantModel = require("../model/productVariantModel");
 const categoryModel = require("../model/categoryModel");
 const asyncHandler = require("express-async-handler");
-const { find } = require("../model/productModel");
 
 const getAllCategory = asyncHandler(async (req, res) => {
   const allCategory = await categoryModel.find();
@@ -280,5 +279,4 @@ module.exports = {
   updateVariant,
   deleteVariant,
   getVariant,
-  getAllCategory,
 };

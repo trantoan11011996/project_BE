@@ -10,22 +10,23 @@ const getAllOrder = asyncHandle(async (req, res) => {
   const pageSize = 10;
   const page = req.query.pageNumber || 1;
   const status = req.query.status || 0;
-  let arr = {};
-  if (status == "pending") {
-    arr = { status: "pending" };
+
+  let arr = [];
+  let options = {};
+
+  if (status) {
+    const arrStatus = status.split(",");
+    for (let value of arrStatus) {
+      arr.push({ status: value });
+    }
+    options = { $or: arr };
+    console.log("arrStatus", arrStatus);
   }
-  if (status == "shipping") {
-    arr = { status: "shipping" };
-  }
-  if (status == "finished") {
-    arr = { status: "finished" };
-  }
-  if (status == "cancel") {
-    arr = { status: "cancel" };
-  }
-  
+
+  console.log("arr", arr);
+
   const order = await orderModel
-    .find(arr)
+    .find(options)
     .skip(pageSize * (page - 1))
     .limit(pageSize)
     .populate({
@@ -33,7 +34,7 @@ const getAllOrder = asyncHandle(async (req, res) => {
       select: "-_id -order",
       populate: {
         path: "variant",
-        select: "discountPrice price productId -_id",
+        select: "discountPrice price productId attributes -_id",
         populate: { path: "productId", select: "name -_id" },
       },
     });
@@ -90,6 +91,8 @@ const createOrder = asyncHandle(async (req, res) => {
 
   body.items = cloneOfItemsOrderModel;
   body.totalPrice = subTotalPrice + Number(body.shippingPrice);
+  body.user = req.userInfo._id;
+  console.log(req.userInfo._id);
   const order = await orderModel.create(body);
 
   // push order into field order of userSchema
@@ -107,8 +110,8 @@ const createOrder = asyncHandle(async (req, res) => {
 });
 
 const deleteOrder = asyncHandle(async (req, res) => {
-  const user = await userModel.findById(req.params.id);
-  const order = await orderModel.findById(req.body.idOrder);
+  const user = await userModel.findById(req.userInfo._id);
+  const order = await orderModel.findById(req.params.id);
 
   if (order) {
     //update field order in userSchema
