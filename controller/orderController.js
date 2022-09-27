@@ -44,7 +44,7 @@ const getAllOrder = asyncHandle(async (req, res) => {
 });
 
 const updateOrder = asyncHandle(async (req, res) => {
-  const order = await orderModel.findById(req.params.id);
+  const order = await orderModel.findById(req.params.id)
   if (order) {
     order.status = req.body.status || order.status;
     order.updateAt = Date();
@@ -72,15 +72,19 @@ const createOrder = asyncHandle(async (req, res) => {
   }
 
   // 2 Calculate shippingPrice by city in mapModel
-  const map = await mapModel.findOne(req.shippingAddress.city);
+
+  const map = await mapModel.findOne({admin_name : body.shippingAddress.city});
+  console.log('map',map)
   const firstItem = Number(map.lat);
   const otherItem = Number(map.lng);
+  console.log('first orther',firstItem,otherItem);
   const shippingPrice =
     (body.items.length - (body.items.length - 1)) * firstItem +
     (body.items.length - 1) * otherItem;
-  if (body.shippingPrice != shippingPrice)
+  if (body.shippingPrice != shippingPrice){
+    console.log(body.shippingPrice,shippingPrice)
     throw new Error("Shipping price is not correct");
-
+  }
   // 3 Loop for all items
   for (let item of body.items) {
     const variant = await variantModel.findById(item.variant);
