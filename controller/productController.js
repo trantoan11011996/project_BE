@@ -204,7 +204,6 @@ const updateVariant = asyncHandler(async (req, res) => {
     }, 0);
 
     product.countInStock = totalCountInStock;
-    bn;
     await product.save();
     res.json({ product, variant });
   } else {
