@@ -1,4 +1,5 @@
 var express = require("express");
+const { createOrder } = require("../controller/orderController");
 const {
   createUser,
   loginUser,
@@ -59,4 +60,9 @@ router.get("/cancel", protect, getCancelForPaypal);
 // access : public
 router.post("/forgotpassword", forgotPassword);
 
+////// 12
+// desc : create order
+// route : POST /api/user/order
+// access : token
+router.post("/order", protect, createOrder);
 module.exports = router;

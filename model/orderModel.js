@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 const orderSchema = new Schema(
   {
+    productId : {type : Schema.Types.ObjectId, ref : "Product"},
     user: { type: Schema.Types.ObjectId, ref: "User" },
     status: {
       type: String,
@@ -25,8 +26,8 @@ const orderSchema = new Schema(
       district: { type: String, required: true },
       city: { type: String, required: true },
     },
-    shippingPrice: { type: Number, required: true },
-    totalPrice: { type: Number, required: true },
+    shippingPrice: { type: Number },
+    totalPrice: { type: Number },
     createAt: {
       type: String,
       required: true,
