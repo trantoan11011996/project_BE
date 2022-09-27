@@ -21,9 +21,9 @@ body = {
         }
     ],
     shippingAddress : {
-        "city" : String,
         "address" : String,
-        "province" : String,
+        "district" : String,
+        "city" : String,
     },
     shippingPrice : String
 }
