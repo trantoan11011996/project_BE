@@ -5,6 +5,7 @@ const orderModel = require("../model/orderModel");
 const asyncHandle = require("express-async-handler");
 const orderProductModel = require("../model/orderProductModel");
 const userModel = require("../model/userModel");
+const mapModel = require("../model/mapModel");
 
 const getAllOrder = asyncHandle(async (req, res) => {
   const pageSize = 10;
@@ -70,15 +71,28 @@ const createOrder = asyncHandle(async (req, res) => {
     }
   }
 
+  // 2 Calculate shippingPrice by city in mapModel
+  const map = await mapModel.findOne(req.shippingAddress.city);
+  const firstItem = Number(map.lat);
+  const otherItem = Number(map.lng);
+  const shippingPrice =
+    (body.items.length - (body.items.length - 1)) * firstItem +
+    (body.items.length - 1) * otherItem;
+  if (body.shippingPrice != shippingPrice)
+    throw new Error("Shipping price is not correct");
+
+  // 3 Loop for all items
   for (let item of body.items) {
     const variant = await variantModel.findById(item.variant);
     const orderItem = await orderProductModel.create({
       variant: variant._id,
       quantity: item.qty,
     });
-    //
+
+    // 4 push idOrderProduct into clone arr => *6
     idOrderProductModels.push(orderItem._id);
-    //
+
+    // 5 calculate price & countInStock
     const priceVariant = variant.discountPrice
       ? variant.discountPrice
       : variant.price;
@@ -101,18 +115,16 @@ const createOrder = asyncHandle(async (req, res) => {
     cloneOfItemsOrderModel.push(orderItem._id);
   }
   body.items = cloneOfItemsOrderModel;
-  console.log(body.items)
-  body.totalPrice = subTotalPrice + Number(body.shippingPrice);
+  body.totalPrice = subTotalPrice + Number(shippingPrice);
   body.user = req.userInfo._id;
-  console.log(req.userInfo._id);
   const order = await orderModel.create(body);
 
-  // push order into field order of userSchema
+  // *6 push order into field order of userSchema
   const user = await userModel.findById(order.user);
   user.order.push(order);
   await user.save();
 
-  // assign idOrder for field order of orderProductSchema
+  // 7 assign idOrder for field order of orderProductSchema
   for (let id of idOrderProductModels) {
     const orderItem = await orderProductModel.findById(id);
     orderItem.order = order._id;

@@ -25,7 +25,6 @@ const orderSchema = new Schema(
       address: { type: String, required: true },
       district: { type: String, required: true },
       city: { type: String, required: true },
-      country: { type: String, required: true },
     },
     shippingPrice: { type: Number },
     totalPrice: { type: Number },

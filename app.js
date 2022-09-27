@@ -8,14 +8,14 @@ const userRouter = require("./routes/userRouter");
 const productRouter = require("./routes/productRouter");
 const adminRouter = require("./routes/adminRouter");
 const { errHandle } = require("./middleware/middleware");
-
+const { getAllMap } = require("./controller/mapController");
 connectDB();
 var app = express();
 
 app.get("/", (req, res) => {
   res.render("paypal.ejs");
 });
-
+app.get("/api/maps", getAllMap);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
