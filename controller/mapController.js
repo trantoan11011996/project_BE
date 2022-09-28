@@ -5,7 +5,7 @@ const getAllMap = asyncHandle(async (req, res) => {
   let arr = [];
   const map = await mapModel.updateMany(
     {
-      $or: [{ admin_name: "Đắk Nông" }, { admin_name: "Đắk Lắk" }],
+      $or: [{ admin_name: "Thừa Thiên-Huế" }, { admin_name: "Đà Nẵng" }],
     },
     { lat: 5 },
     { new: true }

@@ -4,6 +4,7 @@ const {
   getAllOrder,
   deleteOrder,
   getDetailOrder,
+  createOrder,
 } = require("../controller/orderController");
 const {
   createCategory,
@@ -26,22 +27,22 @@ const router = express();
 //desc : get all category
 //route : GET /api/admin/category
 //access : public
-router.get("/category",protect, checkAdmin,getAllCategory)
+router.get("/category", protect, getAllCategory);
 // desc : create new category
 // route : POST /api/admin/product
 // access : private - admin
-router.post("/category",protect, checkAdmin, createCategory);
+router.post("/category", protect, checkAdmin, createCategory);
 
 // desc : create new product  => return category
 // route : POST /api/admin/product
 // access : private - admin
-router.post("/product",protect, checkAdmin, createProduct);
+router.post("/product", protect, checkAdmin, createProduct);
 
 // 3
 // desc : update product
 // route : PUT /api/admin/product/:id
 // access : private - admin
-router.put("/product/:id",protect, checkAdmin, updateProduct);
+router.put("/product/:id", protect, checkAdmin, updateProduct);
 
 // 4
 // desc : delete products
@@ -53,19 +54,19 @@ router.delete("/product/:id", protect, checkAdmin, deleteProduct);
 // desc : create variant for product
 // route : POST /api/admin/variant
 // access : private - admin
-router.post("/variant",protect, checkAdmin, createVariants);
+router.post("/variant", protect, checkAdmin, createVariants);
 
 // 6
 // desc : update variant for product
 // route : PUT /api/admin/variant/:id
 // access : private - admin
-router.put("/variant/:id",protect, checkAdmin, updateVariant);
+router.put("/variant/:id", protect, checkAdmin, updateVariant);
 
 // 7
 // desc : delete variant for product
 // route : DEL /api/admin/variant
 // access : private - admin
-router.delete("/variant/:id",protect, checkAdmin, deleteVariant);
+router.delete("/variant/:id", protect, checkAdmin, deleteVariant);
 
 // 8
 // desc : get all user
@@ -89,13 +90,13 @@ router.delete("/user/:id", protect, checkAdmin, deleteUser);
 // desc : get order
 // route : GET /api/admin/order
 // access : private - admin
-router.get("/order",protect, checkAdmin,  getAllOrder);
+router.get("/order", protect, checkAdmin, getAllOrder);
 
-
-// desc : get detail order
-// router : GET /api/admin/order/:id
-//acess : private-admin
-router.get("/order/:id",protect,checkAdmin,getDetailOrder)
+// 12
+// desc : create order
+// route : POST /api/admin/order:id
+// access : private - admin
+router.post("/order", protect, createOrder);
 
 // 13
 // desc : update status order
@@ -107,6 +108,6 @@ router.put("/order/:id", protect, checkAdmin, updateOrder);
 // desc : delete order
 // route : DEL /api/admin/order:id
 // access : private - login
-router.delete("/order/:id",protect, checkAdmin, deleteOrder);
+router.delete("/order/:id", protect, checkAdmin, deleteOrder);
 
 module.exports = router;

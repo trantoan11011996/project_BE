@@ -61,7 +61,7 @@ const createOrder = asyncHandle(async (req, res) => {
   const cloneOfItemsOrderModel = [];
   const idOrderProductModels = [];
   let subTotalPrice = 0;
-  const product = await productModel.findById(body.productId).populate("variants", "countInStock price discountPrice")
+
   // Check all qty item in order with countInStock of Variant
   for (let item of body.items) {
     const variant = await variantModel.findById(item.variant);
@@ -72,9 +72,7 @@ const createOrder = asyncHandle(async (req, res) => {
   }
 
   // 2 Calculate shippingPrice by city in mapModel
-
-  const map = await mapModel.findOne({admin_name : body.shippingAddress.city});
-  console.log('map',map)
+  const map = await mapModel.findOne({ admin_name: body.shippingAddress.city });
   const firstItem = Number(map.lat);
   const otherItem = Number(map.lng);
   console.log('first orther',firstItem,otherItem);
@@ -103,19 +101,34 @@ const createOrder = asyncHandle(async (req, res) => {
     subTotalPrice += priceVariant * orderItem.quantity;
     variant.countInStock -= orderItem.quantity;
     await variant.save();
-    if(product){
-      const cloneVariants = [...product.variants];
-      for(let itemVariant of cloneVariants){
-        if(String(itemVariant._id)===String(variant._id)){
-          itemVariant.countInStock = variant.countInStock
-          const totalCountInStock = cloneVariants.reduce((total, value) => {
-            return total + value.countInStock;
-          }, 0);
-          product.countInStock = totalCountInStock;
-          product.save()
-        }
+
+    const product = await productModel
+      .findById(variant.productId)
+      .populate("variants", "countInStock");
+    let cloneProductVariant = [...product.variants];
+    for (let value of cloneProductVariant) {
+      if (String(value._id) === String(variant._id)) {
+        value.countInStock = variant.countInStock;
+        const totalCountInStock = cloneProductVariant.reduce((total, cur) => {
+          return total + cur.countInStock;
+        }, 0);
+        product.countInStock = totalCountInStock;
+        await product.save();
       }
     }
+    // if (product) {
+    //   const cloneVariants = [...product.variants];
+    //   for (let itemVariant of cloneVariants) {
+    //     if (String(itemVariant._id) === String(variant._id)) {
+    //       itemVariant.countInStock = variant.countInStock;
+    //       const totalCountInStock = cloneVariants.reduce((total, value) => {
+    //         return total + value.countInStock;
+    //       }, 0);
+    //       product.countInStock = totalCountInStock;
+    //       product.save();
+    //     }
+    //   }
+    // }
     cloneOfItemsOrderModel.push(orderItem._id);
   }
   body.items = cloneOfItemsOrderModel;
@@ -134,7 +147,7 @@ const createOrder = asyncHandle(async (req, res) => {
     orderItem.order = order._id;
     await orderItem.save();
   }
-  res.json({order,product});
+  res.json(order);
 });
 
 const deleteOrder = asyncHandle(async (req, res) => {
@@ -168,16 +181,21 @@ const deleteOrder = asyncHandle(async (req, res) => {
     throw new Error("Order is not exist");
   }
 });
-const getDetailOrder = asyncHandle(async(req,res,next)=>{
-  const order = await orderModel.findById(req.params.id).populate('user','-order -password -_id -isAdmin')
-  .populate('productId','-desc -imageMain -imageDetails -price -category -variants -countInStock -isTrending -productType -accessories -_id')
-  res.json(order)
-})
+const getDetailOrder = asyncHandle(async (req, res, next) => {
+  const order = await orderModel
+    .findById(req.params.id)
+    .populate("user", "-order -password -_id -isAdmin")
+    .populate(
+      "productId",
+      "-desc -imageMain -imageDetails -price -category -variants -countInStock -isTrending -productType -accessories -_id"
+    );
+  res.json(order);
+});
 
 module.exports = {
   getAllOrder,
   updateOrder,
   createOrder,
   deleteOrder,
-  getDetailOrder
+  getDetailOrder,
 };
