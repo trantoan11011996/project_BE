@@ -116,19 +116,6 @@ const createOrder = asyncHandle(async (req, res) => {
         await product.save();
       }
     }
-    // if (product) {
-    //   const cloneVariants = [...product.variants];
-    //   for (let itemVariant of cloneVariants) {
-    //     if (String(itemVariant._id) === String(variant._id)) {
-    //       itemVariant.countInStock = variant.countInStock;
-    //       const totalCountInStock = cloneVariants.reduce((total, value) => {
-    //         return total + value.countInStock;
-    //       }, 0);
-    //       product.countInStock = totalCountInStock;
-    //       product.save();
-    //     }
-    //   }
-    // }
     cloneOfItemsOrderModel.push(orderItem._id);
   }
   body.items = cloneOfItemsOrderModel;
@@ -169,6 +156,20 @@ const deleteOrder = asyncHandle(async (req, res) => {
       const variant = await variantModel.findById(orderItem.variant);
       variant.countInStock += orderItem.quantity;
       await variant.save();
+      const product = await productModel
+        .findById(variant.productId)
+        .populate("variants", "countInStock");
+      let cloneProductVariant = [...product.variants];
+      for (let value of cloneProductVariant) {
+        if (String(value._id) === String(variant._id)) {
+          value.countInStock = variant.countInStock;
+          cloneProductVariant = cloneProductVariant.reduce((total, cur) => {
+            return total + cur.countInStock;
+          }, 0);
+          product.countInStock = cloneProductVariant;
+          await product.save();
+        }
+      }
     }
 
     // delete orderProductSchema
