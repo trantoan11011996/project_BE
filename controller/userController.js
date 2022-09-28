@@ -59,7 +59,14 @@ const createUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await userModel.findOne({ email });
+  const user = await userModel.findOne({ email })
+  .populate({
+    path: "order",
+    populate: {
+      path: "items",
+      populate: { path: "variant", select: "-discountPrice -_id -productId -countInStock" },
+    },
+  select : "-_id -productId -user -createAt -updateAt -order"});
   if (user && (await bcrypt.compare(password, user.password))) {
     res.json({
       name: user.name,
