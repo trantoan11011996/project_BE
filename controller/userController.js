@@ -9,7 +9,6 @@ const nodemailer = require("nodemailer");
 // setup paypal ---------------------------------------------------
 
 const data = {
-  shippingPrice: "17.00",
   items: [
     {
       name: "Iphone 4S",
@@ -36,37 +35,42 @@ const data = {
 };
 
 let total = 0;
-
-// create User
+// const avgShippingPrice = req.body.shippingPrice / req.body.items.length;
+for (let value of data.items) {
+  // value.price = Number(value.price) + Math.round(avgShippingPrice);
+  total += Number(value.price) * Number(value.quantity);
+}
 const createUser = asyncHandler(async (req, res) => {
   const { body } = req;
   const userExist = await userModel.findOne({ email: body.email });
+
   if (userExist) {
     res.status(404);
+    throw new Error("Email existed");
+  } else {
+    const newUser = await userModel.create(req.body);
     res.json({
-      message: "user have been exist",
+      email: newUser.email,
+      name: newUser.name,
+      token: generateToken(newUser._id),
     });
   }
-  const newUser = await userModel.create(req.body);
-  res.json({
-    email: newUser.email,
-    name: newUser.name,
-    token: generateToken(newUser._id),
-  });
 });
 
-//login user
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await userModel.findOne({ email })
-  .populate({
+  const user = await userModel.findOne({ email }).populate({
     path: "order",
     populate: {
       path: "items",
-      populate: { path: "variant", select: "-discountPrice -_id -productId -countInStock" },
+      populate: {
+        path: "variant",
+        select: "-discountPrice -_id -productId -countInStock",
+      },
     },
-  select : "-_id -productId -user -createAt -updateAt -order"});
+    select: "-_id status shippingAddress totalPrice",
+  });
   if (user && (await bcrypt.compare(password, user.password))) {
     res.json({
       name: user.name,
@@ -76,18 +80,21 @@ const loginUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(404);
-    throw new Error("email or password incorrect");
+    throw new Error("Email or password incorrect");
   }
 });
 
 const getProfileUser = asyncHandler(async (req, res) => {
   const user = await userModel.findById(req.userInfo._id).populate({
-    path: "items",
-    select: "-_id -order",
+    path: "order",
     populate: {
-      path: "variant",
-      select: "discountPrice price productId attributes -_id",
-      populate: { path: "productId", select: "name -_id" },
+      path: "items",
+      select: "-_id -order",
+      populate: {
+        path: "variant",
+        select: "discountPrice price productId attributes -_id",
+        populate: { path: "productId", select: "name -_id" },
+      },
     },
   });
   res.json({
@@ -97,29 +104,22 @@ const getProfileUser = asyncHandler(async (req, res) => {
   });
 });
 
-//update user
 const updateUser = asyncHandler(async (req, res) => {
   const user = await userModel.findById(req.userInfo._id);
 
   if (user) {
-    user.email = req.body.email || user.mail;
     user.password = req.body.password || user.password;
     user.name = req.body.name || user.name;
     const update = await user.save();
     res.json({
-      email: update.email,
-      name: update.email,
-      message: "update thành công",
+      name: update.name,
     });
   } else {
     res.status(404);
-    res.json({
-      message: "user not found",
-    });
+    throw new Error("User not found");
   }
 });
 
-// get user by id
 const getUser = asyncHandler(async (req, res) => {
   const user = await userModel
     .findById(req.params.id)
@@ -139,13 +139,12 @@ const getUser = asyncHandler(async (req, res) => {
   }
 });
 
-//get all user
 const getAllUser = asyncHandler(async (req, res) => {
   const pageSize = 16;
   const page = req.query.pageNumber || 1;
   const user = await userModel
     .find()
-    .populate('order')  
+    .populate("order")
     .limit(pageSize)
     .skip(pageSize * (page - 1));
   if (user) {
@@ -156,7 +155,6 @@ const getAllUser = asyncHandler(async (req, res) => {
   }
 });
 
-// delete
 const deleteUser = asyncHandler(async (req, res) => {
   ///liên quan đến  order
   const user = await userModel.findById(req.params.id);
@@ -180,31 +178,25 @@ const payViaPayPalGateWay = asyncHandler(async (req, res) => {
       "EKtM69xiFvknj4y3huTvLk1QjN-23yObV4FvS7jKXVOtATK_P5tskNgHuIz4dJItFBZu6xwWXcsKxFCa",
   });
 
-  const avgShippingPrice = req.body.shippingPrice / req.body.items.length;
-  for (let value of req.body.items) {
-    value.price = Number(value.price) + Math.round(avgShippingPrice);
-    total += Number(value.price) * Number(value.quantity);
-  }
-
   const create_payment_json = {
     intent: "sale",
     payer: {
       payment_method: "paypal",
     },
     redirect_urls: {
-      return_url: "http://localhost:5000/success",
-      cancel_url: "http://localhost:5000/cancel",
+      return_url: "http://localhost:5000/api/users/success",
+      cancel_url: "http://localhost:5000/api/users/cancel",
     },
     transactions: [
       {
         item_list: {
-          items: req.body.items,
+          items: data.items,
         },
         amount: {
           currency: "USD",
           total: String(total),
         },
-        description: "Iphone 4S cũ giá siêu rẻ",
+        description: "This is the payment description.",
       },
     ],
   };
@@ -237,6 +229,7 @@ const getSuccessForPaypal = asyncHandler((req, res) => {
       },
     ],
   };
+
   paypal.payment.execute(
     paymentId,
     execute_payment_json,
@@ -277,55 +270,27 @@ const forgotPassword = asyncHandler(async (req, res) => {
       pass: "aavfpodadmnwyfwd", // generated ethereal password
     },
   });
+  const user = await userModel.findOne({ email: req.body.email });
+  if (user) {
+    await transporter.sendMail({
+      from: "ducvietb79@gmail.com", // sender address
+      to: `${req.body.email}`, // list of receivers
+      subject: "Change your password", // Subject line
+      html: ` 
+      <h2>Hello ${req.body.email} !</h2>
+      <p>Your new password</p>
+      <h1>${newPassword}</h1>
+      `, // html body
+    });
 
-  // send mail with defined transport object
-  let info = await transporter.sendMail({
-    from: "ducvietb79@gmail.com", // sender address
-    to: "phuongdaibang111@gmail.com", // list of receivers
-    subject: "Change your password", // Subject line
-    html: ` 
-    <h2>Hello ${req.body.email} !</h2>
-    <p>Your new password</p>
-    <h1>${newPassword}</h1>
-    `, // html body
-  });
-  if (info) {
-    const user = await userModel.findOne({ email: req.body.email });
     user.password = newPassword;
     await user.save();
-    res.json("success");
+    res.json("Please check your email");
   } else {
     res.status(404);
-    throw new Error("fail");
+    throw new Error("Email is not exist");
   }
-
-  //_---------------------------------------------
-
-  // transporter.verify(function (error, success) {
-  //   // Nếu có lỗi.
-  //   if (error) {
-  //     console.log(error);
-  //   } else {
-  //     //Nếu thành công.
-  //     console.log("Kết nối thành công!");
-  //     var mail = {
-  //       from: "ducvietb79.com@gmail.com", // Địa chỉ email của người gửi
-  //       to: "phuongdaibang111@gmail.com, admin@toicode.com", // Địa chỉ email của người gửi
-  //       subject: "Thư được gửi bằng Node.js", // Tiêu đề mail
-  //       text: "Toidicode.com học lập trình online miễn phí", // Nội dung mail dạng text
-  //     };
-  //     //Tiến hành gửi email
-  //     transporter.sendMail(mail, function (error, info) {
-  //       if (error) {
-  //         // nếu có lỗi
-  //         console.log(error);
-  //       } else {
-  //         //nếu thành công
-  //         console.log("Email sent: " + info.response);
-  //       }
-  //     });
-  //   }
-  // });
+  // send mail with defined transport object
 });
 
 module.exports = {

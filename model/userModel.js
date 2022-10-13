@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const bcrypt = require('bcryptjs')
+const bcrypt = require("bcryptjs");
 const { Schema } = mongoose;
 
-const validateEmail = function (email) {
+const validateEmail = (email) => {
   var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   return re.test(email);
 };
@@ -29,23 +29,22 @@ const userSchema = mongoose.Schema(
       required: true,
     },
     order: [{ type: Schema.Types.ObjectId, ref: "Order" }],
-    isAdmin : {
-      type : Boolean,
-      default : false
-    }
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   { collection: "users" }
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next(); ///check khi người dùng đổi pass => nếu đổi chạy xuống dưới để hasspass
-
+  if (!this.isModified("password")) return next();
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     return next();
-  } catch (e) {
-    return next(e);
+  } catch (err) {
+    return next(err);
   }
 });
 

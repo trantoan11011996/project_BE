@@ -1,6 +1,5 @@
 const productModel = require("../model/productModel");
 const variantModel = require("../model/productVariantModel");
-const categoryModel = require("../model/categoryModel");
 const orderModel = require("../model/orderModel");
 const asyncHandle = require("express-async-handler");
 const orderProductModel = require("../model/orderProductModel");
@@ -21,10 +20,7 @@ const getAllOrder = asyncHandle(async (req, res) => {
       arr.push({ status: value });
     }
     options = { $or: arr };
-    console.log("arrStatus", arrStatus);
   }
-
-  console.log("arr", arr);
 
   const order = await orderModel
     .find(options)
@@ -44,7 +40,7 @@ const getAllOrder = asyncHandle(async (req, res) => {
 });
 
 const updateOrder = asyncHandle(async (req, res) => {
-  const order = await orderModel.findById(req.params.id)
+  const order = await orderModel.findById(req.params.id);
   if (order) {
     order.status = req.body.status || order.status;
     order.updateAt = Date();
@@ -75,12 +71,12 @@ const createOrder = asyncHandle(async (req, res) => {
   const map = await mapModel.findOne({ admin_name: body.shippingAddress.city });
   const firstItem = Number(map.lat);
   const otherItem = Number(map.lng);
-  console.log('first orther',firstItem,otherItem);
+  console.log("first orther", firstItem, otherItem);
   const shippingPrice =
     (body.items.length - (body.items.length - 1)) * firstItem +
     (body.items.length - 1) * otherItem;
-  if (body.shippingPrice != shippingPrice){
-    console.log(body.shippingPrice,shippingPrice)
+  if (body.shippingPrice != shippingPrice) {
+    console.log(body.shippingPrice, shippingPrice);
     throw new Error("Shipping price is not correct");
   }
   // 3 Loop for all items
@@ -143,7 +139,6 @@ const deleteOrder = asyncHandle(async (req, res) => {
 
   if (order) {
     //update field order in userSchema
-    // chú ý ép kiểu khi so sánh : item == order._id => FALSE
     let cloneOrder = [...user.order];
     cloneOrder = cloneOrder.filter((item) => String(item) != String(order._id));
     user.order = cloneOrder;
@@ -182,14 +177,12 @@ const deleteOrder = asyncHandle(async (req, res) => {
     throw new Error("Order is not exist");
   }
 });
+
 const getDetailOrder = asyncHandle(async (req, res, next) => {
   const order = await orderModel
     .findById(req.params.id)
-    .populate("user", "-order -password -_id -isAdmin")
-    .populate(
-      "productId",
-      "-desc -imageMain -imageDetails -price -category -variants -countInStock -isTrending -productType -accessories -_id"
-    );
+    .populate("user", "email")
+    .populate("items", "-order -_id");
   res.json(order);
 });
 
