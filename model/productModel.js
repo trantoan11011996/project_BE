@@ -1,15 +1,10 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose;
-const productSchema = mongoose.Schema(
+const Schema = mongoose.Schema;
+const productSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
+    name: { type: String, required: true },
     desc: {
-      titleDesc: {
-        type: String,
-      },
+      titleDesc: { type: String },
       option: [
         {
           titleOption: {
@@ -18,9 +13,7 @@ const productSchema = mongoose.Schema(
           listOption: [],
         },
       ],
-      video_link: {
-        type: String,
-      },
+      video_link: { type: String },
     },
     imageMain: { type: String, require: true },
     imageDetails: [
@@ -29,21 +22,13 @@ const productSchema = mongoose.Schema(
         required: true,
       },
     ],
-    price: {
-      type: Number,
-    },
+    price: { type: Number },
     category: { type: Schema.Types.ObjectId, ref: "Category" },
     accessories: [{ type: Schema.Types.ObjectId, ref: "Product" }],
     variants: [{ type: Schema.Types.ObjectId, ref: "Variant" }],
-    countInStock: {
-      type: Number,
-    },
-    isTrending: {
-      type: Boolean,
-    },
-    productType: {
-      name: String,
-    },
+    countInStock: { type: Number },
+    isTrending: { type: Boolean },
+    productType: { name: String },
   },
   { collection: "products" }
 );

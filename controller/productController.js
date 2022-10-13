@@ -7,6 +7,7 @@ const getAllCategory = asyncHandler(async (req, res) => {
   const allCategory = await categoryModel.find();
   res.json(allCategory);
 });
+
 const getProductDetail = asyncHandler(async (req, res) => {
   const product = await productModel
     .findById(req.params.id)
@@ -265,6 +266,7 @@ const deleteVariant = asyncHandler(async (req, res) => {
     throw new Error("variant can not found");
   }
 });
+
 module.exports = {
   getProductDetail,
   getAllProduct,

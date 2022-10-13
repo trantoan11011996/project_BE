@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const orderProductModel = require("./orderProductModel");
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema(
@@ -11,10 +10,6 @@ const orderSchema = new Schema(
       required: true,
     },
     items: [
-      // {
-      //   variant: { type: Schema.Types.ObjectId, ref: "Variant" },
-      //   quantity: { type: Number, required: true },
-      // },
       {
         type: Schema.Types.ObjectId,
         ref: "OrderProduct",
