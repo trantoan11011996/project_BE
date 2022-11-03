@@ -11,6 +11,9 @@ const adminRouter = require("./routes/adminRouter");
 const { errHandle } = require("./middleware/middleware");
 const { getAllMap } = require("./controller/mapController");
 
+const passport = require("passport");
+const FacebookStrategy = require("passport-facebook").Strategy;
+const session = require("express-session");
 const swaggerUI = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
@@ -38,7 +41,9 @@ app.get("/testpaypal", (req, res) => {
   res.render("paypal.ejs");
 });
 app.get("/api/maps", getAllMap);
-
+app.get("/", (req, res) => {
+  res.render("index");
+});
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -48,6 +53,73 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+// use session
+app.use(
+  session({
+    secret: "keyboard cat",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
+
+// passport facebook
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+passport.deserializeUser((user, done) => {
+  return done(null, user);
+});
+
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: "602618618318542",
+      clientSecret: "5127729f2fcc3b35bc6e15889d77365f",
+      callbackURL: "http://localhost:5000/auth/facebook/callback",
+      profileFields: ["id", "displayName", "name", "gender", "photos", "email"],
+    },
+    function (accessToken, refreshToken, profile, done) {
+      console.log(profile);
+      return done(null, profile);
+    }
+  )
+);
+
+app.get(
+  "/auth/facebook",
+  passport.authenticate("facebook", {
+    authType: "reauthenticate",
+    scope: ["user_friends", "user_likes"],
+  })
+);
+
+app.get(
+  "/auth/facebook/callback",
+  passport.authenticate("facebook", {
+    failureRedirect: "/",
+    successRedirect: "/home",
+  }),
+  function (req, res) {
+    req.user = user;
+    // Successful authentication, redirect home.
+    res.redirect("/");
+  }
+);
+
+app.get("/home", (req, res, next) => {
+  console.log(req.user);
+  res.render("home", { user: req.user });
+});
+
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/");
+});
 
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
