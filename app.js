@@ -42,7 +42,7 @@ app.get("/testpaypal", (req, res) => {
 });
 app.get("/api/maps", getAllMap);
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index.ejs");
 });
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
