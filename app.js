@@ -8,15 +8,20 @@ const connectDB = require("./config/db");
 const userRouter = require("./routes/userRouter");
 const productRouter = require("./routes/productRouter");
 const adminRouter = require("./routes/adminRouter");
+const passportFacebookRouter = require("./routes/passportFacebook");
+const passportGoogleRouter = require("./routes/passportGoogle");
 const { errHandle } = require("./middleware/middleware");
 const { getAllMap } = require("./controller/mapController");
 
 const passport = require("passport");
-const FacebookStrategy = require("passport-facebook").Strategy;
 const session = require("express-session");
 const swaggerUI = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
+const { passportFacebook, passportGoogle } = require("./config/passport");
+
+passportFacebook();
+passportGoogle();
 connectDB();
 
 // api document swagger
@@ -37,13 +42,16 @@ var app = express();
 
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
-app.get("/testpaypal", (req, res) => {
-  res.render("paypal.ejs");
-});
-app.get("/api/maps", getAllMap);
 app.get("/", (req, res) => {
   res.render("index.ejs");
 });
+
+app.get("/testpaypal", (req, res) => {
+  res.render("paypal.ejs");
+});
+
+app.get("/api/maps", getAllMap);
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -68,62 +76,12 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-passport.deserializeUser((user, done) => {
-  return done(null, user);
-});
-
-passport.use(
-  new FacebookStrategy(
-    {
-      clientID: "602618618318542",
-      clientSecret: "5127729f2fcc3b35bc6e15889d77365f",
-      callbackURL: "http://localhost:5000/auth/facebook/callback",
-      profileFields: ["id", "displayName", "name", "gender", "photos", "email"],
-    },
-    function (accessToken, refreshToken, profile, done) {
-      console.log(profile);
-      return done(null, profile);
-    }
-  )
-);
-
-app.get(
-  "/auth/facebook",
-  passport.authenticate("facebook", {
-    authType: "reauthenticate",
-    scope: ["user_friends", "user_likes"],
-  })
-);
-
-app.get(
-  "/auth/facebook/callback",
-  passport.authenticate("facebook", {
-    failureRedirect: "/",
-    successRedirect: "/home",
-  }),
-  function (req, res) {
-    req.user = user;
-    // Successful authentication, redirect home.
-    res.redirect("/");
-  }
-);
-
-app.get("/home", (req, res, next) => {
-  console.log(req.user);
-  res.render("home", { user: req.user });
-});
-
-app.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.redirect("/");
-});
-
+// router
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/auth/facebook", passportFacebookRouter);
+app.use("/api/auth/google", passportGoogleRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

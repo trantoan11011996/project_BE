@@ -203,7 +203,7 @@ router.put("/profile", protect, updateUser);
  *     summary: Pay via Paypal gateway
  *     security:
  *       - bearerAuth: []
- *     description: You can access this url -- https://keyboard-shop.herokuapp.com/testpaypal
+ *     description: You can access this url -- https://keyboardshop.herokuapp.com/testpaypal
  *     requestBody:
  *       content:
  *         application/json:
@@ -212,12 +212,19 @@ router.put("/profile", protect, updateUser);
  *             properties:
  *               user:
  *                 type: email
- *                 example: user2PayPal@gmail.com
+ *                 example: user4PayPal@gmail.com
  *               password:
  *                 type: string
  *                 example: paypal123
  */
 router.post("/paypalgateway", payViaPayPalGateWay);
+
+/**
+ * @swagger
+ *   post:
+ *     summary: Login with facebook
+ *     description: You can access this url -- https://keyboardshop.herokuapp.com
+ */
 
 // 6.
 // desc : noti success for paypal
