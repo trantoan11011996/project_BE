@@ -184,8 +184,8 @@ const payViaPayPalGateWay = asyncHandler(async (req, res) => {
       payment_method: "paypal",
     },
     redirect_urls: {
-      return_url: "http://localhost:5000/api/users/success",
-      cancel_url: "http://localhost:5000/api/users/cancel",
+      return_url: "https://keyboardshop.herokuapp.com/api/users/success",
+      cancel_url: "https://keyboardshop.herokuapp.com/api/users/cancel",
     },
     transactions: [
       {
@@ -239,14 +239,14 @@ const getSuccessForPaypal = asyncHandler((req, res) => {
         throw error;
       } else {
         console.log(JSON.stringify(payment));
-        res.send("Success (Mua hàng thành công)");
+        res.render("paypalSuccess.ejs");
       }
     }
   );
 });
 
 const getCancelForPaypal = asyncHandler((req, res) => {
-  res.send("Cancelled (Đơn hàng đã hủy)");
+  res.render("paypalFail.ejs");
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
